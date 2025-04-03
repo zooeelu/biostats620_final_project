@@ -2,8 +2,24 @@
 title: "biostats620_final_project"
 ---
 
-Hi \<3 Hi \<3 -zoe \<33333333 \# womeninstem\<3 maybe
+## Question 1: Population Sizes by Age Group and Sex
 
 ```{r}
-1 + 1
+library(tidyverse)
+library(excessmort)
+
+dat <- puerto_rico_counts
+
+dat %>% ggplot(aes(date, population)) + 
+  geom_line(aes(color = agegroup)) +
+  facet_wrap(~sex) +
+  labs(title = "Population Size by Age Group and Gender",
+       x = "Year",
+       y = "Population",
+       color = "Age Group") 
+
 ```
+
+Considering the population size of Puerto Rico from 1985 to 2022, we see differing trends across age groups. For both males and females, the population size for older age groups is increasing, while younger age groups are decreasing. We see this particularly in the 0-4 age group for both sexes. 
+
+
