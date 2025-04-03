@@ -13,8 +13,9 @@ dat <- puerto_rico_counts
 
 #marginal counts, we may want to collapse some of these (maybe into 10 yr bins?)
 t1 <- dat %>%
+  filter(year(date) == 2017) %>% 
   group_by(agegroup, sex) %>%
-  summarize(count = n(), .groups = "drop") %>%
+  summarize(count = mean(population), .groups = "drop") %>%
   pivot_wider(names_from = sex, values_from = count, values_fill = 0)
 
 kable(t1)
