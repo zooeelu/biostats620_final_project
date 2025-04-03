@@ -2,9 +2,7 @@
 title: "biostats620_final_project"
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+Hi \<3
 
 ```{r}
 1 + 1
