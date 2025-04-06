@@ -58,6 +58,9 @@ t2 <- weekly_deaths %>%
 t2 %>% 
   ggplot(aes(x = mmwr_week, y = mean_deaths, color = sex)) + 
   geom_line() + 
+  geom_ribbon(aes(ymin = mean_deaths - sd,
+                  ymax = mean_deaths + sd,
+                  fill = sex), alpha = 0.2, color = NA) +
   facet_wrap(~ agegroup, scales = "free_y")
 
 # creating a df with larger age groups
@@ -84,6 +87,9 @@ t3 <- new_dat %>%
 t3 %>% 
   ggplot(aes(x = mmwr_week, y = mean_deaths, color = sex)) + 
   geom_line() + 
+  geom_ribbon(aes(ymin = mean_deaths - sd,
+                  ymax = mean_deaths + sd,
+                  fill = sex), alpha = 0.2, color = NA) +
   facet_wrap(~ agegroup_new, scales = "free_y")
 ```
 
