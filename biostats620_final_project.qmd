@@ -7,7 +7,6 @@ library(tidyverse)
 library(excessmort)
 library(kableExtra)
 library(lubridate)
-library(epiweek)
 ```
 
 ## Question 1: Population Sizes by Age Group and Sex
