@@ -1,14 +1,18 @@
 ---
 title: "biostats620_final_project"
 ---
-
-## Question 1: Population Sizes by Age Group and Sex
-
+## Packages Used
 ```{r}
 library(tidyverse)
 library(excessmort)
 library(kableExtra)
+library(lubridate)
+library(epiweek)
+```
 
+## Question 1: Population Sizes by Age Group and Sex
+
+```{r}
 dat <- puerto_rico_counts
 
 #marginal counts, we may want to collapse some of these (maybe into 10 yr bins?)
@@ -32,5 +36,69 @@ dat %>% ggplot(aes(date, population)) +
 ```
 
 Considering the population size of Puerto Rico from 1985 to 2022, we see differing trends across age groups. For both males and females, the population size for older age groups is increasing, while younger age groups are decreasing. We see this particularly in the 0-4 age group for both sexes. 
+
+2. Use data from before 2017 to estimate expected mortality and a standard deviation for each week. Do this by age group and sex. Describe tendencies you observe. You can combine data into bigger age groups if the data show they have similar death rates
+```{r}
+weekly_deaths <- dat %>%
+  filter(year(date) < 2017) %>% 
+  mutate(mmwr_week = epiweek(date), 
+         mmwr_year = epiyear(date)) %>% 
+  group_by(agegroup, sex, mmwr_week, mmwr_year) %>%
+  summarise(total_deaths = sum(outcome, na.rm = TRUE)) %>% 
+  ungroup()
+
+t2 <- weekly_deaths %>% 
+  # looking at trends/ estimate what a typical week looks like across years
+  group_by(mmwr_week, agegroup, sex) %>% 
+  summarise(mean_deaths = mean(total_deaths),
+            sd = sd(total_deaths)) %>% 
+  ungroup() 
+
+# some age groups have similar trends
+t2 %>% 
+  ggplot(aes(x = mmwr_week, y = mean_deaths, color = sex)) + 
+  geom_line() + 
+  facet_wrap(~ agegroup, scales = "free_y")
+
+# creating a df with larger age groups
+new_dat <- dat %>% 
+  mutate(mmwr_week = epiweek(date), 
+         mmwr_year = epiyear(date),
+         agegroup_new = case_when(
+           agegroup %in% c("0-4", "5-9", "10-14", "15-19", "20-24") ~ "0-24",
+           agegroup %in% c("25-29", "30-34", "35-39", "40-44", "45-49",
+                           "50-54", "55-59", "60-64") ~ "25-64",
+           agegroup %in% c("65-69", "70-74", "75-79", "80-84") ~ "65-84",
+           agegroup == "85-Inf" ~ "85+")) %>% 
+  group_by(agegroup_new, sex, mmwr_week, mmwr_year) %>%
+  summarise(total_deaths = sum(outcome, na.rm = TRUE)) %>% 
+  ungroup()
+
+t3 <- new_dat %>% 
+  # looking at trends/ estimate what a typical week looks like across years
+  group_by(mmwr_week, agegroup_new, sex) %>% 
+  summarise(mean_deaths = mean(total_deaths),
+            sd = sd(total_deaths)) %>% 
+  ungroup() 
+
+t3 %>% 
+  ggplot(aes(x = mmwr_week, y = mean_deaths, color = sex)) + 
+  geom_line() + 
+  facet_wrap(~ agegroup_new, scales = "free_y")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
