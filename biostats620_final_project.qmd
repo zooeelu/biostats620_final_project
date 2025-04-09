@@ -16,7 +16,6 @@ dat <- puerto_rico_counts
 
 #marginal counts, we may want to collapse some of these (maybe into 10 yr bins?)
 t1 <- dat %>%
-  filter(year(date) == 2017) %>% 
   group_by(agegroup, sex) %>%
   summarize(count = mean(population), .groups = "drop") %>%
   pivot_wider(names_from = sex, values_from = count, values_fill = 0)
@@ -32,19 +31,33 @@ dat %>% ggplot(aes(date, population)) +
        y = "Population",
        color = "Age Group") 
 
-```
-
-Considering the population size of Puerto Rico from 1985 to 2022, we see differing trends across age groups. For both males and females, the population size for older age groups is increasing, while younger age groups are decreasing. We see this particularly in the 0-4 age group for both sexes. 
-
-2. Use data from before 2017 to estimate expected mortality and a standard deviation for each week. Do this by age group and sex. Describe tendencies you observe. You can combine data into bigger age groups if the data show they have similar death rates
-```{r}
 weekly_deaths <- dat %>%
   filter(year(date) < 2017) %>% 
   mutate(mmwr_week = epiweek(date), 
          mmwr_year = epiyear(date)) %>% 
   group_by(agegroup, sex, mmwr_week, mmwr_year) %>%
-  summarise(total_deaths = sum(outcome, na.rm = TRUE)) %>% 
+  summarise(total_deaths = sum(outcome, na.rm = TRUE), population = mean(population)) %>% 
   ungroup()
+
+#adding a plot to comment on why older folks are sticking around longer
+weekly_deaths |> 
+  filter(mmwr_year < 2017) |>
+  group_by(mmwr_year) %>%
+  summarize(mortality = mean(total_deaths/population)*1000, year = mmwr_year) %>% 
+  ggplot(aes(x=year, y= mortality)) +
+  geom_line(color = 'blue') +
+  labs(title = "Yearly Mortality Rates (per 1,000): 2002-2016",
+       x = "Year",
+       y = "Rate")
+
+```
+
+Considering the population size of Puerto Rico from 1985 to 2022, we see differing trends across age groups. For both males and females, the population size for older age groups is increasing, while younger age groups are decreasing. We see this particularly in the 0-4 age group for both sexes. 
+
+When examining the general trend in mortality rates over time, we see a decrease from 1985 to 2016. This could help to explain why we see increased population sizes for older age groups, potentially due to healthier lifestyles and improvements in medical care access and quality. 
+
+2. Use data from before 2017 to estimate expected mortality and a standard deviation for each week. Do this by age group and sex. Describe tendencies you observe. You can combine data into bigger age groups if the data show they have similar death rates
+```{r}
 
 t2 <- weekly_deaths %>% 
   # looking at trends/ estimate what a typical week looks like across years
@@ -75,7 +88,7 @@ new_dat <- dat %>%
            agegroup %in% c("65-69", "70-74", "75-79", "80-84") ~ "65-84",
            agegroup == "85-Inf" ~ "85+")) %>% 
   group_by(agegroup_new, sex, mmwr_week, mmwr_year) %>%
-  summarise(total_deaths = sum(outcome, na.rm = TRUE)) %>% 
+  summarise(total_deaths = sum(outcome, na.rm = TRUE),  population = mean(population)) %>% 
   ungroup()
 
 t3 <- new_dat %>% 
@@ -96,10 +109,34 @@ t3 %>%
   facet_wrap(~ agegroup_new, scales = "free_y")
 ```
 
+Model Fitting:
 
+Linear Model: 
+```{r}
 
+linear <- lm(total_deaths ~ population + mmwr_week + agegroup_new + sex, data = new_dat) #could also use rate here
+summary(linear)
 
+perc_negative <- mean(linear$fitted.values < 0)
 
+plot(linear, which = 1) # we may have an issue with agegroup
+plot(linear, which = 2)
+```
+
+Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome
+
+Log-Linear Model:
+```{r}
+#including population as an offset
+log_linear <- glm(total_deaths ~
+                    mmwr_week + agegroup_new + sex, 
+                  offset = log(population), 
+                  family = poisson, 
+                  data = new_dat)
+
+summary(log_linear)
+
+```
 
 
 
