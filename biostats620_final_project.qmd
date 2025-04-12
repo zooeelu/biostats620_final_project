@@ -166,7 +166,7 @@ summary(neg_bin)
 
 1-pchisq(neg_bin$deviance, neg_bin$df.residual)
 ```
-Comparing this model with the log-linear model, we can see that the residual deviance has been reduced from 66290 to 16776 on 15858 degrees of freedom, showing that this model has a better fit than the log-linear model. However, the probability of observing such a residual deviance value given that the fit model holds is still very low, indicating a lack of model fit desipite its improvements over the previous model.
+Comparing this model with the log-linear model, we can see that the likelihood ratio statistic is now 304787 on 5 degrees of freedom, showing that this model has a better fit than the log-linear model. However, the probability of observing such a residual deviance value given that the fit model holds is still very low, indicating a lack of model fit despite its improvements over the log-linear model.
 
 #### Check for Autocorrelation:
 ```{r}
