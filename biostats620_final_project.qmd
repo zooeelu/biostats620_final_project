@@ -7,6 +7,7 @@ library(tidyverse)
 library(excessmort)
 library(kableExtra)
 library(lubridate)
+library(MASS)
 ```
 
 ## Question 1: Population Sizes by Age Group and Sex
@@ -56,7 +57,8 @@ Considering the population size of Puerto Rico from 1985 to 2022, we see differi
 
 When examining the general trend in mortality rates over time, we see a decrease from 1985 to 2016. This could help to explain why we see increased population sizes for older age groups, potentially due to healthier lifestyles and improvements in medical care access and quality. 
 
-2. Use data from before 2017 to estimate expected mortality and a standard deviation for each week. Do this by age group and sex. Describe tendencies you observe. You can combine data into bigger age groups if the data show they have similar death rates
+## Question 2: Expected mortality 
+
 ```{r}
 
 t2 <- weekly_deaths %>% 
@@ -109,39 +111,67 @@ t3 %>%
   facet_wrap(~ agegroup_new, scales = "free_y")
 ```
 
-Model Fitting:
+### Model Fitting:
 
-Linear Model: 
+#### Linear Model: 
 ```{r}
-
-linear <- lm(total_deaths ~ population + mmwr_week + agegroup_new + sex, data = new_dat) #could also use rate here
+model_dataset <- new_dat %>% mutate(rate = total_deaths/population, age = as.factor(agegroup_new))
+linear <- lm(rate ~ population + mmwr_week + age + sex, data = model_dataset)
 summary(linear)
 
 perc_negative <- mean(linear$fitted.values < 0)
 
-plot(linear, which = 1) # we may have an issue with agegroup
+#clusters in chart?
+plot(linear, which = 1)
 plot(linear, which = 2)
 ```
 
-Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome
+Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome (rate)
 
-Log-Linear Model:
+#### Log-Linear Model:
 ```{r}
-#including population as an offset
-log_linear <- glm(total_deaths ~
-                    mmwr_week + agegroup_new + sex, 
+#do we need year for both plots? or should we limit year?
+log_linear <- glm(total_deaths ~ mmwr_week + agegroup_new + sex, 
                   offset = log(population), 
                   family = poisson, 
                   data = new_dat)
 
 summary(log_linear)
 
+#GOF: prob of observing this deviance value given the df
+1-pchisq(log_linear$deviance, log_linear$df.residual)
+
 ```
+We next fit a log-linear model with mmwr_week, age, and sex again as predictors. We again seek to predict weekly death rate, this time modeling total deaths and using an offset equal to population size for a given week, gender, age, and year. Univariate Wald tests show that each coefficient is significantly associated with our outcome of interest, and a comparison of null and residual deviances shows that our model fits significantly better than the intercept-only model (LRT: 1225348 on 5 degrees of freedom)
+
+Goodness of Fit: Under the null, the residual deviance should be distributed as a $X^2$ random variable with degrees of freedom equal to the model's residual degrees of freedom, 15858. We observe a residual deviance value of 66290. The probability of observing such a residual deviance value given that the fit model holds is essentially zero, indicating a lack of model fit. 
 
 
+#####Assessing for Overdispersion:
+```{r}
+#gaps in chart again?
+plot(log_linear, which = 3)
+overdisp <- log_linear$deviance/log_linear$df.residual
+overdisp
+```
+There is an upward trend in the scale-location plot for predicted values vs standardized pearson residuals. In a well-fitting model, the ratio of residual deviance to the degrees of freedom should be approximately 1 since the poisson distribution assumes that the mean and variance are exactly equal. In this case, the ratio value is 4.18 indicating that overdispersion is present in our data and that we may be underestimating the standard error of our data. 
 
+#### Negative Binomial Regression:
+```{r}
+neg_bin <- glm.nb(total_deaths ~ mmwr_week + agegroup_new + sex + offset(log(population)), 
+                  link = log,
+                  data = new_dat)
 
+summary(neg_bin)
 
+1-pchisq(neg_bin$deviance, neg_bin$df.residual)
+```
+Comparing this model with the log-linear model, we can see that the residual deviance has been reduced from 66290 to 16776 on 15858 degrees of freedom, showing that this model has a better fit than the log-linear model. However, the probability of observing such a residual deviance value given that the fit model holds is still very low, indicating a lack of model fit desipite its improvements over the previous model.
+
+#### Check for Autocorrelation:
+```{r}
+#can do a correlation heat map here to justify hierarchical model
+```
 
 
 
