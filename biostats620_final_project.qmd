@@ -274,22 +274,6 @@ pdf_text <- pdf_text(temp_file)
 
 # view first page of pdf file
 cat(pdf_text[1])
-
-# Combine all pages into one string and split into lines
-all_text <- unlist(strsplit(paste(pdf_text, collapse = "\n"), "\n"))
-
-# Filter lines that look like dates (start with YYYY-MM-DD)
-date_lines <- grep("^\\d{4}-\\d{2}-\\d{2}", all_text, value = TRUE)
-
-# Use regular expressions to extract date and count
-mort_data <- str_match(date_lines, "^(\\d{4}-\\d{2}-\\d{2})\\s+(\\d+)")
-
-# Convert to data frame
-nyt_df <- data.frame(
-  date = as.Date(mort_data[, 2]),
-  deaths = as.numeric(mort_data[, 3])
-)
-
 ```
 
 
