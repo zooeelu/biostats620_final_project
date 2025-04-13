@@ -146,8 +146,8 @@ resids <- residuals(linear)
 
 # QQ plot
 ggplot(data.frame(residuals = resids), aes(sample = residuals)) +
-  stat_qq(size = 1.5, color = "darkblue", alpha = 0.6) +      # dots
-  stat_qq_line(color = "orange", size = 1) +  # reference line
+  stat_qq(size = 1.5, color = "darkblue", alpha = 0.6) +
+  stat_qq_line(color = "orange", size = 1) +  
   labs(title = "Normal Q-Q Plot of Model Residuals",
        x = "Theoretical Quantiles",
        y = "Sample Quantiles") +
