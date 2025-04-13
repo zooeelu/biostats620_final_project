@@ -68,6 +68,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="biostats620_final_project_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="biostats620_final_project_files/libs/bootstrap/bootstrap-973236bd072d72a04ee9cd82dcc9cb29.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -99,51 +128,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="packages-used" class="level2">
 <h2 class="anchored" data-anchor-id="packages-used">Packages Used</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-✔ ggplot2 3.5.1     ✔ purrr   1.0.4
-✔ tibble  3.2.1     ✔ dplyr   1.1.4
-✔ tidyr   1.3.1     ✔ stringr 1.5.1
-✔ readr   2.1.3     ✔ forcats 0.5.2
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(excessmort)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'kableExtra'
-
-The following object is masked from 'package:dplyr':
-
-    group_rows</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'lubridate'
-
-The following objects are masked from 'package:base':
-
-    date, intersect, setdiff, union</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(excessmort)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="question-1-population-sizes-by-age-group-and-sex" class="level2">
 <h2 class="anchored" data-anchor-id="question-1-population-sizes-by-age-group-and-sex">Question 1: Population Sizes by Age Group and Sex</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> puerto_rico_counts</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#marginal counts, we may want to collapse some of these (maybe into 10 yr bins?)</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>t1 <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(date) <span class="sc">==</span> <span class="dv">2017</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agegroup, sex) <span class="sc">%&gt;%</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">mean</span>(population), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> sex, <span class="at">values_from =</span> count, <span class="at">values_fill =</span> <span class="dv">0</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(t1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> puerto_rico_counts</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#marginal counts, we may want to collapse some of these (maybe into 10 yr bins?)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>t1 <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agegroup, sex) <span class="sc">%&gt;%</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">mean</span>(population), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> sex, <span class="at">values_from =</span> count, <span class="at">values_fill =</span> <span class="dv">0</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(t1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -156,105 +159,105 @@ The following objects are masked from 'package:base':
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">0-4</td>
-<td style="text-align: right;">70412.08</td>
-<td style="text-align: right;">73674.39</td>
+<td style="text-align: right;">118886.60</td>
+<td style="text-align: right;">124166.89</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">5-9</td>
-<td style="text-align: right;">87449.42</td>
-<td style="text-align: right;">89524.94</td>
+<td style="text-align: right;">128338.20</td>
+<td style="text-align: right;">134027.91</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">10-14</td>
-<td style="text-align: right;">96127.70</td>
-<td style="text-align: right;">100430.57</td>
+<td style="text-align: right;">137254.48</td>
+<td style="text-align: right;">142834.59</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">15-19</td>
-<td style="text-align: right;">108478.80</td>
-<td style="text-align: right;">113009.61</td>
+<td style="text-align: right;">140546.33</td>
+<td style="text-align: right;">145330.13</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">20-24</td>
-<td style="text-align: right;">114702.23</td>
-<td style="text-align: right;">117455.06</td>
+<td style="text-align: right;">136900.96</td>
+<td style="text-align: right;">135803.44</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">25-29</td>
-<td style="text-align: right;">112516.20</td>
-<td style="text-align: right;">110815.97</td>
+<td style="text-align: right;">129586.13</td>
+<td style="text-align: right;">122670.16</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">30-34</td>
-<td style="text-align: right;">98738.98</td>
-<td style="text-align: right;">90723.61</td>
+<td style="text-align: right;">124736.05</td>
+<td style="text-align: right;">114279.74</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">35-39</td>
-<td style="text-align: right;">108877.15</td>
-<td style="text-align: right;">97388.46</td>
+<td style="text-align: right;">123391.99</td>
+<td style="text-align: right;">110548.18</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">40-44</td>
-<td style="text-align: right;">108264.92</td>
-<td style="text-align: right;">97873.43</td>
+<td style="text-align: right;">122339.68</td>
+<td style="text-align: right;">108089.43</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">45-49</td>
-<td style="text-align: right;">112067.91</td>
-<td style="text-align: right;">101362.78</td>
+<td style="text-align: right;">116511.76</td>
+<td style="text-align: right;">102230.66</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">50-54</td>
-<td style="text-align: right;">120523.92</td>
-<td style="text-align: right;">103849.54</td>
+<td style="text-align: right;">111973.38</td>
+<td style="text-align: right;">96919.54</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">55-59</td>
-<td style="text-align: right;">119168.00</td>
-<td style="text-align: right;">101434.07</td>
+<td style="text-align: right;">104562.71</td>
+<td style="text-align: right;">89331.28</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">60-64</td>
-<td style="text-align: right;">113896.63</td>
-<td style="text-align: right;">95691.26</td>
+<td style="text-align: right;">94151.71</td>
+<td style="text-align: right;">80090.52</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">65-69</td>
-<td style="text-align: right;">106025.80</td>
-<td style="text-align: right;">87428.01</td>
+<td style="text-align: right;">82889.24</td>
+<td style="text-align: right;">69814.59</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">70-74</td>
-<td style="text-align: right;">93655.23</td>
-<td style="text-align: right;">76230.45</td>
+<td style="text-align: right;">67546.00</td>
+<td style="text-align: right;">55648.71</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">75-79</td>
-<td style="text-align: right;">68729.07</td>
-<td style="text-align: right;">54323.22</td>
+<td style="text-align: right;">52283.22</td>
+<td style="text-align: right;">41288.09</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">80-84</td>
-<td style="text-align: right;">49040.13</td>
-<td style="text-align: right;">35531.38</td>
+<td style="text-align: right;">35543.43</td>
+<td style="text-align: right;">26154.14</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">85-Inf</td>
-<td style="text-align: right;">52396.47</td>
-<td style="text-align: right;">30857.98</td>
+<td style="text-align: right;">34932.77</td>
+<td style="text-align: right;">21848.33</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#stratified plots</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>dat <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(date, population)) <span class="sc">+</span> </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">color =</span> agegroup)) <span class="sc">+</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>sex) <span class="sc">+</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Population Size by Age Group and Gender"</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Population"</span>,</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Age Group"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#stratified plots</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dat <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(date, population)) <span class="sc">+</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">color =</span> agegroup)) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>sex) <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Population Size by Age Group and Gender"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Population"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Age Group"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -262,34 +265,56 @@ The following objects are masked from 'package:base':
 </figure>
 </div>
 </div>
-</div>
-<p>Considering the population size of Puerto Rico from 1985 to 2022, we see differing trends across age groups. For both males and females, the population size for older age groups is increasing, while younger age groups are decreasing. We see this particularly in the 0-4 age group for both sexes.</p>
-<ol start="2" type="1">
-<li>Use data from before 2017 to estimate expected mortality and a standard deviation for each week. Do this by age group and sex. Describe tendencies you observe. You can combine data into bigger age groups if the data show they have similar death rates</li>
-</ol>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>weekly_deaths <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(date) <span class="sc">&lt;</span> <span class="dv">2017</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mmwr_week =</span> <span class="fu">epiweek</span>(date), </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">mmwr_year =</span> <span class="fu">epiyear</span>(date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agegroup, sex, mmwr_week, mmwr_year) <span class="sc">%&gt;%</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_deaths =</span> <span class="fu">sum</span>(outcome, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>weekly_deaths <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(date) <span class="sc">&lt;</span> <span class="dv">2017</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mmwr_week =</span> <span class="fu">epiweek</span>(date), </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">mmwr_year =</span> <span class="fu">epiyear</span>(date)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agegroup, sex, mmwr_week, mmwr_year) <span class="sc">%&gt;%</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_deaths =</span> <span class="fu">sum</span>(outcome, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">population =</span> <span class="fu">mean</span>(population)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'agegroup', 'sex', 'mmwr_week'. You can
 override using the `.groups` argument.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> weekly_deaths <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># looking at trends/ estimate what a typical week looks like across years</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(mmwr_week, agegroup, sex) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_deaths =</span> <span class="fu">mean</span>(total_deaths),</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">sd =</span> <span class="fu">sd</span>(total_deaths)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#adding a plot to comment on why older folks are sticking around longer</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>weekly_deaths <span class="sc">|&gt;</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&lt;</span> <span class="dv">2017</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(mmwr_year) <span class="sc">%&gt;%</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mortality =</span> <span class="fu">mean</span>(total_deaths<span class="sc">/</span>population)<span class="sc">*</span><span class="dv">1000</span>, <span class="at">year =</span> mmwr_year) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>year, <span class="at">y=</span> mortality)) <span class="sc">+</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">'blue'</span>) <span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Yearly Mortality Rates (per 1,000): 2002-2016"</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Rate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'mmwr_year'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Considering the population size of Puerto Rico from 1985 to 2022, we see differing trends across age groups. For both males and females, the population size for older age groups is increasing, while younger age groups are decreasing. We see this particularly in the 0-4 age group for both sexes.</p>
+<p>When examining the general trend in mortality rates over time, we see a decrease from 1985 to 2016. This could help to explain why we see increased population sizes for older age groups, potentially due to healthier lifestyles and improvements in medical care access and quality.</p>
+</section>
+<section id="question-2-expected-mortality-before-2017" class="level2">
+<h2 class="anchored" data-anchor-id="question-2-expected-mortality-before-2017">Question 2: Expected mortality Before 2017</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> weekly_deaths <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># looking at trends/ estimate what a typical week looks like across years</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(mmwr_week, agegroup, sex) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_deaths =</span> <span class="fu">mean</span>(total_deaths),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">sd =</span> <span class="fu">sd</span>(total_deaths)) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'mmwr_week', 'agegroup'. You can override
 using the `.groups` argument.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(t2, <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(t2, <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -375,14 +400,14 @@ using the `.groups` argument.</code></pre>
 </tbody>
 </table>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># some age groups have similar trends</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>t2 <span class="sc">%&gt;%</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mmwr_week, <span class="at">y =</span> mean_deaths, <span class="at">color =</span> sex)) <span class="sc">+</span> </span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_deaths <span class="sc">-</span> sd,</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">ymax =</span> mean_deaths <span class="sc">+</span> sd,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">fill =</span> sex), <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> agegroup, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># some age groups have similar trends</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>t2 <span class="sc">%&gt;%</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mmwr_week, <span class="at">y =</span> mean_deaths, <span class="at">color =</span> sex)) <span class="sc">+</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_deaths <span class="sc">-</span> sd,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">ymax =</span> mean_deaths <span class="sc">+</span> sd,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">fill =</span> sex), <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> agegroup, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -390,34 +415,34 @@ using the `.groups` argument.</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating a df with larger age groups</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>new_dat <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mmwr_week =</span> <span class="fu">epiweek</span>(date), </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">mmwr_year =</span> <span class="fu">epiyear</span>(date),</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">agegroup_new =</span> <span class="fu">case_when</span>(</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>           agegroup <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"0-4"</span>, <span class="st">"5-9"</span>, <span class="st">"10-14"</span>, <span class="st">"15-19"</span>, <span class="st">"20-24"</span>) <span class="sc">~</span> <span class="st">"0-24"</span>,</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>           agegroup <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"25-29"</span>, <span class="st">"30-34"</span>, <span class="st">"35-39"</span>, <span class="st">"40-44"</span>, <span class="st">"45-49"</span>,</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"50-54"</span>, <span class="st">"55-59"</span>, <span class="st">"60-64"</span>) <span class="sc">~</span> <span class="st">"25-64"</span>,</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>           agegroup <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"65-69"</span>, <span class="st">"70-74"</span>, <span class="st">"75-79"</span>, <span class="st">"80-84"</span>) <span class="sc">~</span> <span class="st">"65-84"</span>,</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>           agegroup <span class="sc">==</span> <span class="st">"85-Inf"</span> <span class="sc">~</span> <span class="st">"85+"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agegroup_new, sex, mmwr_week, mmwr_year) <span class="sc">%&gt;%</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_deaths =</span> <span class="fu">sum</span>(outcome, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating a df with larger age groups</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>new_dat <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mmwr_week =</span> <span class="fu">epiweek</span>(date), </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">mmwr_year =</span> <span class="fu">epiyear</span>(date),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">agegroup_new =</span> <span class="fu">case_when</span>(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>           agegroup <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"0-4"</span>, <span class="st">"5-9"</span>, <span class="st">"10-14"</span>, <span class="st">"15-19"</span>, <span class="st">"20-24"</span>) <span class="sc">~</span> <span class="st">"0-24"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>           agegroup <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"25-29"</span>, <span class="st">"30-34"</span>, <span class="st">"35-39"</span>, <span class="st">"40-44"</span>, <span class="st">"45-49"</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"50-54"</span>, <span class="st">"55-59"</span>, <span class="st">"60-64"</span>) <span class="sc">~</span> <span class="st">"25-64"</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>           agegroup <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"65-69"</span>, <span class="st">"70-74"</span>, <span class="st">"75-79"</span>, <span class="st">"80-84"</span>) <span class="sc">~</span> <span class="st">"65-84"</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>           agegroup <span class="sc">==</span> <span class="st">"85-Inf"</span> <span class="sc">~</span> <span class="st">"85+"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agegroup_new, sex, mmwr_week, mmwr_year) <span class="sc">%&gt;%</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_deaths =</span> <span class="fu">sum</span>(outcome, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),  <span class="at">population =</span> <span class="fu">mean</span>(population)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'agegroup_new', 'sex', 'mmwr_week'. You can
 override using the `.groups` argument.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># looking at trends/ estimate what a typical week looks like across years</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(mmwr_week, agegroup_new, sex) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_deaths =</span> <span class="fu">mean</span>(total_deaths),</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">sd =</span> <span class="fu">sd</span>(total_deaths)) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># looking at trends/ estimate what a typical week looks like across years</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(mmwr_week, agegroup_new, sex) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_deaths =</span> <span class="fu">mean</span>(total_deaths),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">sd =</span> <span class="fu">sd</span>(total_deaths)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'mmwr_week', 'agegroup_new'. You can
 override using the `.groups` argument.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(t3, <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(t3, <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -503,13 +528,13 @@ override using the `.groups` argument.</code></pre>
 </tbody>
 </table>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>t3 <span class="sc">%&gt;%</span> </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mmwr_week, <span class="at">y =</span> mean_deaths, <span class="at">color =</span> sex)) <span class="sc">+</span> </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_deaths <span class="sc">-</span> sd,</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">ymax =</span> mean_deaths <span class="sc">+</span> sd,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">fill =</span> sex), <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> agegroup_new, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>t3 <span class="sc">%&gt;%</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mmwr_week, <span class="at">y =</span> mean_deaths, <span class="at">color =</span> sex)) <span class="sc">+</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_deaths <span class="sc">-</span> sd,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">ymax =</span> mean_deaths <span class="sc">+</span> sd,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">fill =</span> sex), <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> agegroup_new, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -518,6 +543,292 @@ override using the `.groups` argument.</code></pre>
 </div>
 </div>
 </div>
+<section id="model-fitting" class="level3">
+<h3 class="anchored" data-anchor-id="model-fitting">Model Fitting:</h3>
+<section id="linear-model" class="level4">
+<h4 class="anchored" data-anchor-id="linear-model">Linear Model:</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pre-2017 data</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>model_dataset <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&lt;</span> <span class="dv">2017</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new))</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2017 and after data used for prediction</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&gt;=</span> <span class="dv">2017</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new))</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co"># linear model fit on data before 2017</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>linear <span class="ot">&lt;-</span> <span class="fu">lm</span>(rate <span class="sc">~</span> population <span class="sc">+</span> mmwr_week <span class="sc">+</span> age <span class="sc">+</span> sex, <span class="at">data =</span> model_dataset)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(linear)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = rate ~ population + mmwr_week + age + sex, data = model_dataset)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-1.630e-03 -2.093e-04 -4.560e-06  1.816e-04  1.846e-03 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  1.739e-03  3.805e-05   45.71   &lt;2e-16 ***
+population  -1.258e-08  2.525e-10  -49.83   &lt;2e-16 ***
+mmwr_week   -2.074e-06  2.001e-07  -10.36   &lt;2e-16 ***
+age25-64     1.975e-04  1.186e-05   16.65   &lt;2e-16 ***
+age65-84     1.262e-03  2.506e-05   50.35   &lt;2e-16 ***
+age85+       1.067e-03  3.112e-05   34.28   &lt;2e-16 ***
+sexmale      4.230e-04  6.321e-06   66.92   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.0003484 on 13353 degrees of freedom
+Multiple R-squared:  0.917, Adjusted R-squared:  0.917 
+F-statistic: 2.46e+04 on 6 and 13353 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check if there are negative fitted values</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>perc_negative <span class="ot">&lt;-</span> <span class="fu">mean</span>(linear<span class="sc">$</span>fitted.values <span class="sc">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>perc_negative</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.08787425</code></pre>
+</div>
+</div>
+<section id="linear-model-diagnostics" class="level5">
+<h5 class="anchored" data-anchor-id="linear-model-diagnostics">Linear Model Diagnostics</h5>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#clusters in chart?</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(linear, which = 1)</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(linear, which = 2)</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>resids <span class="ot">&lt;-</span> <span class="fu">residuals</span>(linear)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># QQ plot</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">residuals =</span> resids), <span class="fu">aes</span>(<span class="at">sample =</span> residuals)) <span class="sc">+</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_qq</span>(<span class="at">size =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span>      <span class="co"># dots</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_qq_line</span>(<span class="at">color =</span> <span class="st">"orange"</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span>  <span class="co"># reference line</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normal Q-Q Plot of Model Residuals"</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Theoretical Quantiles"</span>,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Sample Quantiles"</span>) <span class="sc">+</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Residuals vs Fitted Plot</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>model_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">fitted =</span> <span class="fu">fitted</span>(linear),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">residuals =</span> <span class="fu">residuals</span>(linear)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(model_df, <span class="fu">aes</span>(<span class="at">x =</span> fitted, <span class="at">y =</span> residuals)) <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"indianred"</span>) <span class="sc">+</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"orange"</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>) <span class="sc">+</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Residuals vs Fitted Values"</span>,</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Fitted Values"</span>,</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Residuals"</span>) <span class="sc">+</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome (rate).</p>
+</section>
+<section id="linear-model-prediction" class="level5">
+<h5 class="anchored" data-anchor-id="linear-model-prediction">Linear Model Prediction</h5>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># use linear model to predict data 2017 and after</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>predict_dataset<span class="sc">$</span>predicted_rate <span class="ot">&lt;-</span> <span class="fu">predict</span>(linear, <span class="at">newdata =</span> predict_dataset)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># excess mortality (obs - predicted)</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span> </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predicted_deaths =</span> predicted_rate <span class="sc">*</span> population,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_mortality =</span> rate <span class="sc">-</span> predicted_rate, </span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_deaths =</span> total_deaths <span class="sc">-</span> predicted_deaths)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co"># comparing true vs expected predicted rate (excess mortality)</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mmwr_label =</span> <span class="fu">paste0</span>(mmwr_year, <span class="st">"-W"</span>, stringr<span class="sc">::</span><span class="fu">str_pad</span>(mmwr_week, <span class="dv">2</span>, <span class="at">pad =</span> <span class="st">"0"</span>)))</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co"># observed vs fitted plots</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(predict_dataset, <span class="fu">aes</span>(<span class="at">x =</span> rate, <span class="at">y =</span> predicted_rate, <span class="at">color =</span> agegroup_new)) <span class="sc">+</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Observed vs Predicted Mortality Rate"</span>,</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Observed Rate"</span>, <span class="at">y =</span> <span class="st">"Predicted Rate"</span>) <span class="sc">+</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot of excess mortality over weeks</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>plot_df <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span> </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mmwr_year, mmwr_week) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">week_index =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(week_index, rate, predicted_rate, sex, agegroup_new) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"rate"</span>, <span class="st">"predicted_rate"</span>), </span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"type"</span>, </span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"mortality_rate"</span>)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(<span class="at">x =</span> week_index, <span class="at">y =</span> mortality_rate, <span class="at">color =</span> type)) <span class="sc">+</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.7</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(sex <span class="sc">~</span> agegroup_new) <span class="sc">+</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Observed vs. Predicted Mortality by Age Group and Sex"</span>, </span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Mortality Rate"</span>,</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week Index"</span>) <span class="sc">+</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In addition to the model violating the linear model assumptions, we can see that the model does not predcit well and a better suited model should be used. From the Predicted vs Observed Rates plot, we can see that for the most part, the linear model is overestimating the actual mortality rate. There seems to be more week to week variation in actual mortality for the 65-84 and 85+ age groups which the model is also not fully capturing.</p>
+</section>
+</section>
+<section id="log-linear-model" class="level4">
+<h4 class="anchored" data-anchor-id="log-linear-model">Log-Linear Model:</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#do we need year for both plots? or should we limit year?</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>log_linear <span class="ot">&lt;-</span> <span class="fu">glm</span>(total_deaths <span class="sc">~</span> mmwr_week <span class="sc">+</span> agegroup_new <span class="sc">+</span> sex, </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">offset =</span> <span class="fu">log</span>(population), </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> poisson, </span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> new_dat)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(log_linear)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = total_deaths ~ mmwr_week + agegroup_new + sex, 
+    family = poisson, data = new_dat, offset = log(population))
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-8.5235  -1.4753  -0.1232   1.3931   9.0833  
+
+Coefficients:
+                    Estimate Std. Error  z value Pr(&gt;|z|)    
+(Intercept)       -9.536e+00  4.939e-03 -1930.96   &lt;2e-16 ***
+mmwr_week         -8.830e-04  6.339e-05   -13.93   &lt;2e-16 ***
+agegroup_new25-64  1.997e+00  4.854e-03   411.46   &lt;2e-16 ***
+agegroup_new65-84  3.227e+00  4.712e-03   684.89   &lt;2e-16 ***
+agegroup_new85+    3.298e+00  4.893e-03   673.92   &lt;2e-16 ***
+sexmale            4.901e-01  1.930e-03   253.97   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 1291638  on 15863  degrees of freedom
+Residual deviance:   66290  on 15858  degrees of freedom
+AIC: 156826
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#GOF: prob of observing this deviance value given the df</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">-</span><span class="fu">pchisq</span>(log_linear<span class="sc">$</span>deviance, log_linear<span class="sc">$</span>df.residual)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>We next fit a log-linear model with mmwr_week, age, and sex again as predictors. We again seek to predict weekly death rate, this time modeling total deaths and using an offset equal to population size for a given week, gender, age, and year. Univariate Wald tests show that each coefficient is significantly associated with our outcome of interest, and a comparison of null and residual deviances shows that our model fits significantly better than the intercept-only model (LRT: 1225348 on 5 degrees of freedom)</p>
+<p>Goodness of Fit: Under the null, the residual deviance should be distributed as a <span class="math inline">\(X^2\)</span> random variable with degrees of freedom equal to the model’s residual degrees of freedom, 15858. We observe a residual deviance value of 66290. The probability of observing such a residual deviance value given that the fit model holds is essentially zero, indicating a lack of model fit.</p>
+<p>#####Assessing for Overdispersion:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#gaps in chart again?</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(log_linear, <span class="at">which =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>overdisp <span class="ot">&lt;-</span> log_linear<span class="sc">$</span>deviance<span class="sc">/</span>log_linear<span class="sc">$</span>df.residual</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>overdisp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4.180209</code></pre>
+</div>
+</div>
+<p>There is an upward trend in the scale-location plot for predicted values vs standardized pearson residuals. In a well-fitting model, the ratio of residual deviance to the degrees of freedom should be approximately 1 since the poisson distribution assumes that the mean and variance are exactly equal. In this case, the ratio value is 4.18 indicating that overdispersion is present in our data and that we may be underestimating the standard error of our data.</p>
+</section>
+<section id="negative-binomial-regression" class="level4">
+<h4 class="anchored" data-anchor-id="negative-binomial-regression">Negative Binomial Regression:</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>neg_bin <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(total_deaths <span class="sc">~</span> mmwr_week <span class="sc">+</span> agegroup_new <span class="sc">+</span> sex <span class="sc">+</span> <span class="fu">offset</span>(<span class="fu">log</span>(population)), </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">link =</span> log,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> new_dat)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(neg_bin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm.nb(formula = total_deaths ~ mmwr_week + agegroup_new + sex + 
+    offset(log(population)), data = new_dat, link = log, init.theta = 20.89443824)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-3.7989  -0.8262  -0.1070   0.6459   6.6791  
+
+Coefficients:
+                    Estimate Std. Error   z value Pr(&gt;|z|)    
+(Intercept)       -9.5835000  0.0072995 -1312.893  &lt; 2e-16 ***
+mmwr_week         -0.0007073  0.0001396    -5.068 4.03e-07 ***
+agegroup_new25-64  1.9979269  0.0070224   284.506  &lt; 2e-16 ***
+agegroup_new65-84  3.2959496  0.0069163   476.548  &lt; 2e-16 ***
+agegroup_new85+    3.3679468  0.0070526   477.544  &lt; 2e-16 ***
+sexmale            0.5196172  0.0042149   123.280  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for Negative Binomial(20.8944) family taken to be 1)
+
+    Null deviance: 321563  on 15863  degrees of freedom
+Residual deviance:  16776  on 15858  degrees of freedom
+AIC: 128143
+
+Number of Fisher Scoring iterations: 1
+
+              Theta:  20.894 
+          Std. Err.:  0.335 
+
+ 2 x log-likelihood:  -128128.879 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">-</span><span class="fu">pchisq</span>(neg_bin<span class="sc">$</span>deviance, neg_bin<span class="sc">$</span>df.residual)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.073681e-07</code></pre>
+</div>
+</div>
+<p>Comparing this model with the log-linear model, we can see that the likelihood ratio statistic is now 304787 on 5 degrees of freedom, showing that this model has a better fit than the log-linear model. However, the probability of observing such a residual deviance value given that the fit model holds is still very low, indicating a lack of model fit despite its improvements over the log-linear model.</p>
+</section>
+<section id="check-for-autocorrelation" class="level4">
+<h4 class="anchored" data-anchor-id="check-for-autocorrelation">Check for Autocorrelation:</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#can do a correlation heat map here to justify hierarchical model</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
 </section>
 
 </main>

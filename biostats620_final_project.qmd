@@ -2,17 +2,18 @@
 title: "biostats620_final_project"
 ---
 ## Packages Used
-```{r}
+```{r, warning = FALSE, message = FALSE}
 library(tidyverse)
 library(excessmort)
 library(kableExtra)
 library(lubridate)
 library(MASS)
+library(pdftools)
 ```
 
 ## Question 1: Population Sizes by Age Group and Sex
 
-```{r}
+```{r, warning = FALSE}
 dat <- puerto_rico_counts
 
 #marginal counts, we may want to collapse some of these (maybe into 10 yr bins?)
@@ -57,10 +58,9 @@ Considering the population size of Puerto Rico from 1985 to 2022, we see differi
 
 When examining the general trend in mortality rates over time, we see a decrease from 1985 to 2016. This could help to explain why we see increased population sizes for older age groups, potentially due to healthier lifestyles and improvements in medical care access and quality. 
 
-## Question 2: Expected mortality 
+## Question 2: Expected mortality Before 2017
 
-```{r}
-
+```{r, warning = FALSE}
 t2 <- weekly_deaths %>% 
   # looking at trends/ estimate what a typical week looks like across years
   group_by(mmwr_week, agegroup, sex) %>% 
@@ -115,18 +115,105 @@ t3 %>%
 
 #### Linear Model: 
 ```{r}
-model_dataset <- new_dat %>% mutate(rate = total_deaths/population, age = as.factor(agegroup_new))
+# pre-2017 data
+model_dataset <- new_dat %>% 
+  filter(mmwr_year < 2017) %>% 
+  mutate(rate = total_deaths/population, 
+         age = as.factor(agegroup_new))
+
+# 2017 and after data used for prediction
+predict_dataset <- new_dat %>% 
+  filter(mmwr_year >= 2017) %>% 
+  mutate(rate = total_deaths/population, 
+         age = as.factor(agegroup_new))
+
+# linear model fit on data before 2017
 linear <- lm(rate ~ population + mmwr_week + age + sex, data = model_dataset)
 summary(linear)
 
+# check if there are negative fitted values
 perc_negative <- mean(linear$fitted.values < 0)
+perc_negative
+``` 
 
+##### Linear Model Diagnostics
+```{r}
 #clusters in chart?
-plot(linear, which = 1)
-plot(linear, which = 2)
+# plot(linear, which = 1)
+# plot(linear, which = 2)
+
+resids <- residuals(linear)
+
+# QQ plot
+ggplot(data.frame(residuals = resids), aes(sample = residuals)) +
+  stat_qq(size = 1.5, color = "darkblue", alpha = 0.6) +      # dots
+  stat_qq_line(color = "orange", size = 1) +  # reference line
+  labs(title = "Normal Q-Q Plot of Model Residuals",
+       x = "Theoretical Quantiles",
+       y = "Sample Quantiles") +
+  theme_minimal()
+
+# Residuals vs Fitted Plot
+model_df <- data.frame(
+  fitted = fitted(linear),
+  residuals = residuals(linear)
+)
+
+ggplot(model_df, aes(x = fitted, y = residuals)) +
+  geom_point(alpha = 0.4, color = "darkblue", size = 1.5) +
+  geom_hline(yintercept = 0, color = "indianred") +
+  geom_smooth(method = "loess", se = FALSE, color = "orange", linetype = "solid") +
+  labs(title = "Residuals vs Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+
 ```
 
-Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome (rate)
+Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome (rate). 
+
+##### Linear Model Prediction
+```{r, fig.width = 12, fig.height = 8}
+# use linear model to predict data 2017 and after
+predict_dataset$predicted_rate <- predict(linear, newdata = predict_dataset)
+
+# excess mortality (obs - predicted)
+predict_dataset <- predict_dataset %>% 
+  mutate(predicted_deaths = predicted_rate * population,
+         excess_mortality = rate - predicted_rate, 
+         excess_deaths = total_deaths - predicted_deaths)
+
+# comparing true vs expected predicted rate (excess mortality)
+predict_dataset <- predict_dataset %>%
+  mutate(mmwr_label = paste0(mmwr_year, "-W", stringr::str_pad(mmwr_week, 2, pad = "0")))
+
+# observed vs fitted plots
+ggplot(predict_dataset, aes(x = rate, y = predicted_rate, color = agegroup_new)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red", size = 0.8) +
+  labs(title = "Observed vs Predicted Mortality Rate",
+       x = "Observed Rate", y = "Predicted Rate") +
+  theme_minimal()
+
+# plot of excess mortality over weeks
+plot_df <- predict_dataset %>% 
+  arrange(mmwr_year, mmwr_week) %>% 
+  mutate(week_index = row_number()) %>% 
+  dplyr::select(week_index, rate, predicted_rate, sex, agegroup_new) %>% 
+  pivot_longer(cols = c("rate", "predicted_rate"), 
+               names_to = "type", 
+               values_to = "mortality_rate")
+
+ggplot(plot_df, aes(x = week_index, y = mortality_rate, color = type)) +
+  geom_point(size = 0.7, alpha = 0.5) +
+  facet_grid(sex ~ agegroup_new) +
+  labs(title = "Observed vs. Predicted Mortality by Age Group and Sex", 
+       y = "Mortality Rate",
+       x = "Week Index") +
+  theme_minimal()
+```
+
+In addition to the model violating the linear model assumptions, we can see that the model does not predcit well and a better suited model should be used. From the Predicted vs Observed Rates plot, we can see that for the most part, the linear model is overestimating the actual mortality rate. There seems to be more week to week variation in actual mortality for the 65-84 and 85+ age groups which the model is also not fully capturing.
 
 #### Log-Linear Model:
 ```{r}
@@ -174,6 +261,36 @@ Comparing this model with the log-linear model, we can see that the likelihood r
 ```
 
 
+## Comparison of NYT Data and excessmort Data
+```{r}
+pdf_url <- "https://github.com/c2-d2/pr_mort_official/raw/master/data/Mortalidad-RegDem-2015-17-NYT-part1.pdf"
+
+# Download PDF to a temporary file
+temp_file <- tempfile(fileext = ".pdf")
+download.file(pdf_url, temp_file, mode = "wb")
+
+# extract text from PDF
+pdf_text <- pdf_text(temp_file)
+
+# view first page of pdf file
+cat(pdf_text[1])
+
+# Combine all pages into one string and split into lines
+all_text <- unlist(strsplit(paste(pdf_text, collapse = "\n"), "\n"))
+
+# Filter lines that look like dates (start with YYYY-MM-DD)
+date_lines <- grep("^\\d{4}-\\d{2}-\\d{2}", all_text, value = TRUE)
+
+# Use regular expressions to extract date and count
+mort_data <- str_match(date_lines, "^(\\d{4}-\\d{2}-\\d{2})\\s+(\\d+)")
+
+# Convert to data frame
+nyt_df <- data.frame(
+  date = as.Date(mort_data[, 2]),
+  deaths = as.numeric(mort_data[, 3])
+)
+
+```
 
 
 
