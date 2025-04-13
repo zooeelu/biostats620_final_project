@@ -58,7 +58,7 @@ Considering the population size of Puerto Rico from 1985 to 2022, we see differi
 
 When examining the general trend in mortality rates over time, we see a decrease from 1985 to 2016. This could help to explain why we see increased population sizes for older age groups, potentially due to healthier lifestyles and improvements in medical care access and quality. 
 
-## Question 2: Expected mortality Before 2017
+## Question 2 & 4: Expected mortality Before 2017 & Excess Mortality for 2017-2018
 
 ```{r, warning = FALSE}
 t2 <- weekly_deaths %>% 
@@ -121,9 +121,9 @@ model_dataset <- new_dat %>%
   mutate(rate = total_deaths/population, 
          age = as.factor(agegroup_new))
 
-# 2017 and after data used for prediction
+# 2017-2018 data used for prediction
 predict_dataset <- new_dat %>% 
-  filter(mmwr_year >= 2017) %>% 
+  filter(mmwr_year >= 2017 & mmwr_year <= 2018) %>% 
   mutate(rate = total_deaths/population, 
          age = as.factor(agegroup_new))
 

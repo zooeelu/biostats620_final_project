@@ -302,8 +302,8 @@ override using the `.groups` argument.</code></pre>
 <p>Considering the population size of Puerto Rico from 1985 to 2022, we see differing trends across age groups. For both males and females, the population size for older age groups is increasing, while younger age groups are decreasing. We see this particularly in the 0-4 age group for both sexes.</p>
 <p>When examining the general trend in mortality rates over time, we see a decrease from 1985 to 2016. This could help to explain why we see increased population sizes for older age groups, potentially due to healthier lifestyles and improvements in medical care access and quality.</p>
 </section>
-<section id="question-2-expected-mortality-before-2017" class="level2">
-<h2 class="anchored" data-anchor-id="question-2-expected-mortality-before-2017">Question 2: Expected mortality Before 2017</h2>
+<section id="question-2-4-expected-mortality-before-2017-excess-mortality-for-2017-2018" class="level2">
+<h2 class="anchored" data-anchor-id="question-2-4-expected-mortality-before-2017-excess-mortality-for-2017-2018">Question 2 &amp; 4: Expected mortality Before 2017 &amp; Excess Mortality for 2017-2018</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> weekly_deaths <span class="sc">%&gt;%</span> </span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># looking at trends/ estimate what a typical week looks like across years</span></span>
@@ -555,9 +555,9 @@ override using the `.groups` argument.</code></pre>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new))</span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2017 and after data used for prediction</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2017-2018 data used for prediction</span></span>
 <span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&gt;=</span> <span class="dv">2017</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&gt;=</span> <span class="dv">2017</span> <span class="sc">&amp;</span> mmwr_year <span class="sc">&lt;=</span> <span class="dv">2018</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new))</span>
 <span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
