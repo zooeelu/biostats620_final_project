@@ -270,10 +270,10 @@ temp_file <- tempfile(fileext = ".pdf")
 download.file(pdf_url, temp_file, mode = "wb")
 
 # extract text from PDF
-pdf_text <- pdf_text(temp_file)
+pdf_text_data <- pdf_text(temp_file)
 
 # view first page of pdf file
-cat(pdf_text[1])
+cat(pdf_text_data[1])
 ```
 
 
