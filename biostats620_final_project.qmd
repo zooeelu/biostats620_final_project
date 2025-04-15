@@ -58,7 +58,7 @@ Considering the population size of Puerto Rico from 1985 to 2022, we see differi
 
 When examining the general trend in mortality rates over time, we see a decrease from 1985 to 2016. This could help to explain why we see increased population sizes for older age groups, potentially due to healthier lifestyles and improvements in medical care access and quality. 
 
-## Question 2 & 4: Expected mortality Before 2017 & Excess Mortality for 2017-2018
+## Question 2: Expected mortality Before 2017
 
 ```{r, warning = FALSE}
 t2 <- weekly_deaths %>% 
@@ -111,19 +111,12 @@ t3 %>%
   facet_wrap(~ agegroup_new, scales = "free_y")
 ```
 
-### Model Fitting:
 
-#### Linear Model: 
+### Linear Model: 
 ```{r}
 # pre-2017 data
 model_dataset <- new_dat %>% 
   filter(mmwr_year < 2017) %>% 
-  mutate(rate = total_deaths/population, 
-         age = as.factor(agegroup_new))
-
-# 2017-2018 data used for prediction
-predict_dataset <- new_dat %>% 
-  filter(mmwr_year >= 2017 & mmwr_year <= 2018) %>% 
   mutate(rate = total_deaths/population, 
          age = as.factor(agegroup_new))
 
@@ -136,9 +129,8 @@ perc_negative <- mean(linear$fitted.values < 0)
 perc_negative
 ``` 
 
-##### Linear Model Diagnostics
+#### Linear Model Diagnostics
 ```{r}
-#clusters in chart?
 # plot(linear, which = 1)
 # plot(linear, which = 2)
 
@@ -172,8 +164,146 @@ ggplot(model_df, aes(x = fitted, y = residuals)) +
 
 Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome (rate). 
 
-##### Linear Model Prediction
+### Log-Linear Model:
+```{r}
+#do we need year for both plots? or should we limit year?
+log_linear <- glm(total_deaths ~ mmwr_week + agegroup_new + sex, 
+                  offset = log(population), 
+                  family = poisson, 
+                  data = new_dat)
+
+summary(log_linear)
+
+#GOF: prob of observing this deviance value given the df
+1-pchisq(log_linear$deviance, log_linear$df.residual)
+
+```
+We next fit a log-linear model with mmwr_week, age, and sex again as predictors. We again seek to predict weekly death rate, this time modeling total deaths and using an offset equal to population size for a given week, gender, age, and year. Univariate Wald tests show that each coefficient is significantly associated with our outcome of interest, and a comparison of null and residual deviances shows that our model fits significantly better than the intercept-only model (LRT: 1225348 on 5 degrees of freedom).
+
+Goodness of Fit: Under the null, the residual deviance should be distributed as a $X^2$ random variable with degrees of freedom equal to the model's residual degrees of freedom, 15858. We observe a residual deviance value of 66290. The probability of observing such a residual deviance value given that the fit model holds is essentially zero, indicating a lack of model fit. 
+
+
+####Assessing for Overdispersion:
+```{r}
+#gaps in chart again?
+plot(log_linear, which = 3)
+overdisp <- log_linear$deviance/log_linear$df.residual
+overdisp
+```
+There is an upward trend in the scale-location plot for predicted values vs standardized pearson residuals. In a well-fitting model, the ratio of residual deviance to the degrees of freedom should be approximately 1 since the poisson distribution assumes that the mean and variance are exactly equal. In this case, the ratio value is 4.18 indicating that overdispersion is present and that we may be underestimating the standard error of our data. 
+
+### Negative Binomial Regression:
+```{r}
+neg_bin <- glm.nb(total_deaths ~ mmwr_week + agegroup_new + sex + agegroup_new*sex + offset(log(population)), 
+                  link = log,
+                  data = new_dat)
+
+summary(neg_bin)
+
+1-pchisq(neg_bin$deviance, neg_bin$df.residual)
+```
+
+Comparing this model with the log-linear model on AIC, we conclude that the negative binomial model fits better given its lower AIC value (156826 vs 122573). However, the probability of observing such a residual deviance value given that the fit model holds is still very low (p = 1.940181e-05), indicating a lack of model fit despite improvements.
+
+
+#### Check for Autocorrelation:
+```{r}
+#can do a correlation heat map here to justify hierarchical model
+```
+
+
+#### Expected Mortality by Week with Standard Deviations:
+```{r}
+
+```
+
+
+## Question 3: Periods with Excess Mortality Before 2018
+### Linear Model
+```{r}
+# Looking only at data before 20178 
+predict_pre <- new_dat %>% 
+  filter(mmwr_year <= 2017) %>%
+  arrange(mmwr_year, mmwr_week) %>% 
+  mutate(rate = total_deaths/population, 
+         age = as.factor(agegroup_new),
+         week_index = row_number())
+
+# getting predictions
+predict_pre$predicted_rate <- predict(linear, newdata = predict_pre)
+
+# excess mortality (obs - predicted)
+predict_pre <- predict_pre %>% 
+  mutate(predicted_deaths = predicted_rate * population,
+         excess_mortality = rate - predicted_rate, 
+         excess_deaths = total_deaths - predicted_deaths)
+
+#observed v fitted over time: looking at sex differences
+predict_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
+  geom_smooth(aes(color = sex, group = sex), method = "loess", se = FALSE, span = 0.1) +
+  labs(title = "Excess Mortality over Time: Before 2018",
+       subtitle = "Differences by Sex",
+       x = "Week", y = "Excess Mortality",
+       color = 'Sex') +
+  theme_minimal()
+
+predict_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
+  geom_smooth(aes(color = agegroup_new, group = agegroup_new), method = "loess", se = FALSE, span = 0.1) +
+  labs(title = "Excess Mortality over Time: Before 2019",
+       subtitle = 'Differences by Age Group',
+       x = "Week", y = "Excess Mortality",
+       color = 'Age Group') +
+  theme_minimal()
+
+```
+### Negative Binomial Model
+```{r}
+# Looking only at data before 2018 
+predictnb_pre <- new_dat %>% 
+  filter(mmwr_year <= 2017) %>%
+  arrange(mmwr_year, mmwr_week) %>% 
+  mutate(rate = total_deaths/population, 
+         age = as.factor(agegroup_new),
+         week_index = row_number())
+
+# use nb model to predict rates for data before 2018
+predictnb_pre$predicted_rate <- predict(neg_bin, type = 'response', newdata = predictnb_pre) / predictnb_pre$population
+
+# excess mortality (obs - predicted)
+predictnb_pre <- predictnb_pre %>% 
+  mutate(true_rate = total_deaths/population,
+         excess_mortality = true_rate - predicted_rate)
+
+#observed v fitted over time: looking at sex differences
+predictnb_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
+  geom_smooth(aes(color = sex, group = sex), method = "loess", se = FALSE, span = 0.1) +
+  labs(title = "Excess Mortality over Time: Before 2018",
+       subtitle = "Differences by Sex",
+       x = "Week", y = "Excess Mortality",
+       color = 'Sex')+
+  theme_minimal()
+
+predictnb_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
+  geom_smooth(aes(color = agegroup_new, group = agegroup_new), method = "loess", se = FALSE, span = 0.1) +
+  labs(title = "Excess Mortality over Time: Before 2019",
+       subtitle = 'Differences by Age Group',
+       x = "Week", y = "Excess Mortality",
+       color = 'Age Group') +
+  theme_minimal()
+
+```
+Based on the predictions from the linear and negative binomial models, there appears to be excess mortality in the year 1985. This is particularly seen in older age demographics. 
+
+
+## Question 4: Predictions for 2017-2018
+### Linear Prediction
 ```{r, fig.width = 12, fig.height = 8}
+# 2017-2018 data used for prediction
+predict_dataset <- new_dat %>% 
+  filter(mmwr_year >= 2017 & mmwr_year <= 2018) %>% 
+  mutate(rate = total_deaths/population, 
+         age = as.factor(agegroup_new))
+
 # use linear model to predict data 2017 and after
 predict_dataset$predicted_rate <- predict(linear, newdata = predict_dataset)
 
@@ -192,7 +322,8 @@ ggplot(predict_dataset, aes(x = rate, y = predicted_rate, color = agegroup_new))
   geom_point(alpha = 0.5) +
   geom_abline(intercept = 0, slope = 1, color = "red", size = 0.8) +
   labs(title = "Observed vs Predicted Mortality Rate",
-       x = "Observed Rate", y = "Predicted Rate") +
+       x = "Observed Rate", y = "Predicted Rate",
+       color = 'Age Group') +
   theme_minimal()
 
 # plot of excess mortality over weeks
@@ -211,57 +342,69 @@ ggplot(plot_df, aes(x = week_index, y = mortality_rate, color = type)) +
        y = "Mortality Rate",
        x = "Week Index") +
   theme_minimal()
+
 ```
 
-In addition to the model violating the linear model assumptions, we can see that the model does not predcit well and a better suited model should be used. From the Predicted vs Observed Rates plot, we can see that for the most part, the linear model is overestimating the actual mortality rate. There seems to be more week to week variation in actual mortality for the 65-84 and 85+ age groups which the model is also not fully capturing.
+In addition to the model violating the linear model assumptions, we can see that the model does not predict well and a better suited model should be used. From the Predicted vs Observed Rates plot, we can see that for the most part, the linear model is overestimating the actual mortality rate. There seems to be more week to week variation in actual mortality for the 65-84 and 85+ age groups which the model is also not fully capturing.
 
-#### Log-Linear Model:
+
+### Negative Binomal Prediction:
 ```{r}
-#do we need year for both plots? or should we limit year?
-log_linear <- glm(total_deaths ~ mmwr_week + agegroup_new + sex, 
-                  offset = log(population), 
-                  family = poisson, 
-                  data = new_dat)
+# 2017-2018 data used for prediction
+predict_nb <- new_dat %>% 
+  filter(mmwr_year >= 2017 & mmwr_year <= 2018) %>% 
+  mutate(age = as.factor(agegroup_new))
 
-summary(log_linear)
+# use nb model to predict data 2017 and after
+predict_nb$predicted_rate <- predict(neg_bin, type = 'response', newdata = predict_nb) / predict_nb$population
 
-#GOF: prob of observing this deviance value given the df
-1-pchisq(log_linear$deviance, log_linear$df.residual)
+# excess mortality (obs - predicted)
+predict_nb <- predict_nb %>% 
+  mutate(true_rate = total_deaths/population,
+         excess_mortality = true_rate - predicted_rate)
+
+# comparing true vs expected predicted rate (excess mortality)
+predict_nb <- predict_nb %>%
+  mutate(mmwr_label = paste0(mmwr_year, "-W", stringr::str_pad(mmwr_week, 2, pad = "0")))
+
+# observed vs fitted plots
+ggplot(predict_nb, aes(x = true_rate, y = predicted_rate, color = agegroup_new)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red", size = 0.8) +
+  labs(title = "Observed vs Predicted Mortality Rate: Negative Binomial Model",
+       x = "Observed Rate", y = "Predicted Rate",
+       color = 'Age Group') +
+  theme_minimal()
 
 ```
-We next fit a log-linear model with mmwr_week, age, and sex again as predictors. We again seek to predict weekly death rate, this time modeling total deaths and using an offset equal to population size for a given week, gender, age, and year. Univariate Wald tests show that each coefficient is significantly associated with our outcome of interest, and a comparison of null and residual deviances shows that our model fits significantly better than the intercept-only model (LRT: 1225348 on 5 degrees of freedom)
 
-Goodness of Fit: Under the null, the residual deviance should be distributed as a $X^2$ random variable with degrees of freedom equal to the model's residual degrees of freedom, 15858. We observe a residual deviance value of 66290. The probability of observing such a residual deviance value given that the fit model holds is essentially zero, indicating a lack of model fit. 
-
-
-#####Assessing for Overdispersion:
+### Excess Mortality over Time
 ```{r}
-#gaps in chart again?
-plot(log_linear, which = 3)
-overdisp <- log_linear$deviance/log_linear$df.residual
-overdisp
-```
-There is an upward trend in the scale-location plot for predicted values vs standardized pearson residuals. In a well-fitting model, the ratio of residual deviance to the degrees of freedom should be approximately 1 since the poisson distribution assumes that the mean and variance are exactly equal. In this case, the ratio value is 4.18 indicating that overdispersion is present in our data and that we may be underestimating the standard error of our data. 
+#observed v fitted over time: looking at sex differences
+predict_nb %>% ggplot(aes(x = mmwr_week, y = excess_mortality)) +
+  geom_smooth(aes(color = sex, group = sex), method = "loess", se = FALSE, span = 0.2) +
+  facet_wrap(~mmwr_year) +
+  labs(title = "Excess Mortality over Time: Negative Binomial Model",
+       subtitle = "Differences in Excess Mortality by Sex",
+       x = "Week", y = "Excess Mortality",
+       color = 'Sex') +
+  theme_minimal()
 
-#### Negative Binomial Regression:
-```{r}
-neg_bin <- glm.nb(total_deaths ~ mmwr_week + agegroup_new + sex + offset(log(population)), 
-                  link = log,
-                  data = new_dat)
+#observed v fitted over time: looking at age group differences
+predict_nb %>% ggplot(aes(x = mmwr_week, y = excess_mortality)) +
+  geom_smooth(aes(color = agegroup_new, group = agegroup_new), method = "loess", se = FALSE, span = 0.2) +
+  facet_wrap(~mmwr_year) +
+  labs(title = "Excess Mortality over Time: Negative Binomial Model",
+       subtitle = "Differences in Excess Mortality by Age Group",
+       x = "Week", y = "Excess Mortality",
+       color = 'Age Group') +
+  theme_minimal()
 
-summary(neg_bin)
-
-1-pchisq(neg_bin$deviance, neg_bin$df.residual)
-```
-Comparing this model with the log-linear model, we can see that the likelihood ratio statistic is now 304787 on 5 degrees of freedom, showing that this model has a better fit than the log-linear model. However, the probability of observing such a residual deviance value given that the fit model holds is still very low, indicating a lack of model fit despite its improvements over the log-linear model.
-
-#### Check for Autocorrelation:
-```{r}
-#can do a correlation heat map here to justify hierarchical model
 ```
 
 
-## Comparison of NYT Data and excessmort Data
+
+## Question 5: Comparison of NYT Data and excessmort Data
 ```{r}
 pdf_url <- "https://github.com/c2-d2/pr_mort_official/raw/master/data/Mortalidad-RegDem-2015-17-NYT-part1.pdf"
 
