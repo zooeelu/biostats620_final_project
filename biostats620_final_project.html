@@ -133,7 +133,8 @@ window.Quarto = {
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pdftools)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pdftools)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tabulapdf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="question-1-population-sizes-by-age-group-and-sex" class="level2">
@@ -1040,60 +1041,126 @@ Number of Fisher Scoring iterations: 1
 <div class="cell">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>pdf_url <span class="ot">&lt;-</span> <span class="st">"https://github.com/c2-d2/pr_mort_official/raw/master/data/Mortalidad-RegDem-2015-17-NYT-part1.pdf"</span></span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Download PDF to a temporary file</span></span>
-<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>temp_file <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".pdf"</span>)</span>
-<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(pdf_url, temp_file, <span class="at">mode =</span> <span class="st">"wb"</span>)</span>
-<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a><span class="co"># extract text from PDF</span></span>
-<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>pdf_text_data <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(temp_file)</span>
-<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a><span class="co"># view first page of pdf file</span></span>
-<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(pdf_text_data[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="co"># View(extract_tables(pdf_url, pages = 1)[[1]])</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Download PDF to a temporary file</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>temp_file <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".pdf"</span>)</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(pdf_url, temp_file, <span class="at">mode =</span> <span class="st">"wb"</span>)</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a><span class="co"># extract text from PDF</span></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>pdf_text_data <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(temp_file)</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a><span class="co"># view first page of pdf file</span></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(pdf_text_data[1])</span></span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>extract_table_from_page <span class="ot">&lt;-</span> <span class="cf">function</span>(page_text) {</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>  lines <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(page_text, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>  lines <span class="ot">&lt;-</span> <span class="fu">trimws</span>(lines)</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Keep lines that start with day numbers (1-31)</span></span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a>  table_lines <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"^</span><span class="sc">\\</span><span class="st">d{1,2}</span><span class="sc">\\</span><span class="st">s"</span>, lines, <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Split on 2+ spaces, assuming table is aligned that way</span></span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>  split_lines <span class="ot">&lt;-</span> <span class="fu">str_split_fixed</span>(table_lines, <span class="st">"</span><span class="sc">\\</span><span class="st">s{2,}"</span>, <span class="dv">5</span>)</span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(split_lines) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Day"</span>, <span class="st">"Y2015"</span>, <span class="st">"Y2016"</span>, <span class="st">"Y2017"</span>, <span class="st">"Diff"</span>)</span>
+<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert to a tibble and clean up</span></span>
+<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>(split_lines) <span class="sc">%&gt;%</span></span>
+<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), str_trim)) <span class="sc">%&gt;%</span></span>
+<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="sc">-</span>Day, <span class="sc">~</span> <span class="fu">as.numeric</span>(<span class="fu">str_replace_all</span>(., <span class="st">"[^0-9</span><span class="sc">\\</span><span class="st">.-]"</span>, <span class="st">""</span>))))</span>
+<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb53-32"><a href="#cb53-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-33"><a href="#cb53-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the extraction function to each page</span></span>
+<span id="cb53-34"><a href="#cb53-34" aria-hidden="true" tabindex="-1"></a>tables_list <span class="ot">&lt;-</span> <span class="fu">lapply</span>(pdf_text_data, extract_table_from_page)</span>
+<span id="cb53-35"><a href="#cb53-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-36"><a href="#cb53-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine into one data frame</span></span>
+<span id="cb53-37"><a href="#cb53-37" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(tables_list, <span class="at">.id =</span> <span class="st">"Page"</span>)</span>
+<span id="cb53-38"><a href="#cb53-38" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-39"><a href="#cb53-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"Sep"</span>,</span>
+<span id="cb53-40"><a href="#cb53-40" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">2</span>, <span class="st">"Oct"</span>,</span>
+<span id="cb53-41"><a href="#cb53-41" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">3</span>, <span class="st">"Nov"</span>,</span>
+<span id="cb53-42"><a href="#cb53-42" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">4</span>, <span class="st">"Dec"</span>,</span>
+<span id="cb53-43"><a href="#cb53-43" aria-hidden="true" tabindex="-1"></a>                                             <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">5</span>, <span class="st">"Jan"</span>,</span>
+<span id="cb53-44"><a href="#cb53-44" aria-hidden="true" tabindex="-1"></a>                                                    <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">6</span>, <span class="st">"Feb"</span>,</span>
+<span id="cb53-45"><a href="#cb53-45" aria-hidden="true" tabindex="-1"></a>                                                           <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">7</span>, <span class="st">"Mar"</span>, </span>
+<span id="cb53-46"><a href="#cb53-46" aria-hidden="true" tabindex="-1"></a>                                                                  <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">8</span>, <span class="st">"Apr"</span>,</span>
+<span id="cb53-47"><a href="#cb53-47" aria-hidden="true" tabindex="-1"></a>                                                                         <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">9</span>, <span class="st">"May"</span>,</span>
+<span id="cb53-48"><a href="#cb53-48" aria-hidden="true" tabindex="-1"></a>                                                                                <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">10</span>, <span class="st">"Jun"</span>,</span>
+<span id="cb53-49"><a href="#cb53-49" aria-hidden="true" tabindex="-1"></a>                                                                                       <span class="fu">ifelse</span>(Page <span class="sc">==</span> <span class="dv">11</span>, <span class="st">"Jul"</span>, <span class="st">"Aug"</span>)))))))))))) <span class="sc">%&gt;%</span> </span>
+<span id="cb53-50"><a href="#cb53-50" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Page, Month, Y2015, Y2016, Y2016, Y2017, Diff) <span class="sc">%&gt;%</span> </span>
+<span id="cb53-51"><a href="#cb53-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"index"</span>)</span>
+<span id="cb53-52"><a href="#cb53-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-53"><a href="#cb53-53" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing nov data</span></span>
+<span id="cb53-54"><a href="#cb53-54" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-55"><a href="#cb53-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">84</span><span class="sc">:</span><span class="dv">88</span>)))</span>
+<span id="cb53-56"><a href="#cb53-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-57"><a href="#cb53-57" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing dec data </span></span>
+<span id="cb53-58"><a href="#cb53-58" aria-hidden="true" tabindex="-1"></a>full_table[full_table<span class="sc">$</span>Page <span class="sc">==</span> <span class="dv">4</span>, <span class="st">"Y2017"</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb53-59"><a href="#cb53-59" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-60"><a href="#cb53-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">115</span>)))</span>
+<span id="cb53-61"><a href="#cb53-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-62"><a href="#cb53-62" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing jan data</span></span>
+<span id="cb53-63"><a href="#cb53-63" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-64"><a href="#cb53-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">147</span>)))</span>
+<span id="cb53-65"><a href="#cb53-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-66"><a href="#cb53-66" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing feb data</span></span>
+<span id="cb53-67"><a href="#cb53-67" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-68"><a href="#cb53-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">179</span>)))</span>
+<span id="cb53-69"><a href="#cb53-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-70"><a href="#cb53-70" aria-hidden="true" tabindex="-1"></a>full_table[full_table<span class="sc">$</span>index <span class="sc">==</span> <span class="dv">190</span>, <span class="st">"Y2015"</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb53-71"><a href="#cb53-71" aria-hidden="true" tabindex="-1"></a>full_table[full_table<span class="sc">$</span>index <span class="sc">==</span> <span class="dv">190</span>, <span class="st">"Y2016"</span>] <span class="ot">&lt;-</span> <span class="dv">70</span></span>
+<span id="cb53-72"><a href="#cb53-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-73"><a href="#cb53-73" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing march data</span></span>
+<span id="cb53-74"><a href="#cb53-74" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-75"><a href="#cb53-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">209</span>)))</span>
+<span id="cb53-76"><a href="#cb53-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-77"><a href="#cb53-77" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing april data</span></span>
+<span id="cb53-78"><a href="#cb53-78" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-79"><a href="#cb53-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">241</span>)))</span>
+<span id="cb53-80"><a href="#cb53-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-81"><a href="#cb53-81" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing may data</span></span>
+<span id="cb53-82"><a href="#cb53-82" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-83"><a href="#cb53-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">272</span>)))</span>
+<span id="cb53-84"><a href="#cb53-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-85"><a href="#cb53-85" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing june date</span></span>
+<span id="cb53-86"><a href="#cb53-86" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-87"><a href="#cb53-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">306</span>)))</span>
+<span id="cb53-88"><a href="#cb53-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-89"><a href="#cb53-89" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing july date</span></span>
+<span id="cb53-90"><a href="#cb53-90" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-91"><a href="#cb53-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">335</span>)))</span>
+<span id="cb53-92"><a href="#cb53-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-93"><a href="#cb53-93" aria-hidden="true" tabindex="-1"></a><span class="co"># fixing aug date</span></span>
+<span id="cb53-94"><a href="#cb53-94" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-95"><a href="#cb53-95" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(index <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">367</span>)))</span>
+<span id="cb53-96"><a href="#cb53-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-97"><a href="#cb53-97" aria-hidden="true" tabindex="-1"></a><span class="co"># View(full_table[full_table$Page == 12, ]) </span></span>
+<span id="cb53-98"><a href="#cb53-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-99"><a href="#cb53-99" aria-hidden="true" tabindex="-1"></a>full_table <span class="ot">&lt;-</span> full_table <span class="sc">%&gt;%</span> </span>
+<span id="cb53-100"><a href="#cb53-100" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diff =</span> Y2017 <span class="sc">-</span> Y2016,</span>
+<span id="cb53-101"><a href="#cb53-101" aria-hidden="true" tabindex="-1"></a>         <span class="at">Page =</span> <span class="fu">as.numeric</span>(Page),</span>
+<span id="cb53-102"><a href="#cb53-102" aria-hidden="true" tabindex="-1"></a>         <span class="at">day =</span> <span class="fu">c</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">31</span>),</span>
+<span id="cb53-103"><a href="#cb53-103" aria-hidden="true" tabindex="-1"></a>         <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">31</span>), </span>
+<span id="cb53-104"><a href="#cb53-104" aria-hidden="true" tabindex="-1"></a>         <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">31</span>), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">29</span>), </span>
+<span id="cb53-105"><a href="#cb53-105" aria-hidden="true" tabindex="-1"></a>         <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">31</span>), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>), </span>
+<span id="cb53-106"><a href="#cb53-106" aria-hidden="true" tabindex="-1"></a>         <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">31</span>), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>), </span>
+<span id="cb53-107"><a href="#cb53-107" aria-hidden="true" tabindex="-1"></a>         <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">31</span>), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">31</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb53-108"><a href="#cb53-108" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span> <span class="fu">select</span>(Month, day, Y2015, Y2016, Y2017, diff)</span>
+<span id="cb53-109"><a href="#cb53-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-110"><a href="#cb53-110" aria-hidden="true" tabindex="-1"></a><span class="co"># day &lt;- c(c(1:30), c(1:31),</span></span>
+<span id="cb53-111"><a href="#cb53-111" aria-hidden="true" tabindex="-1"></a><span class="co">#          c(1:30), c(1:31), </span></span>
+<span id="cb53-112"><a href="#cb53-112" aria-hidden="true" tabindex="-1"></a><span class="co">#          c(1:31), c(1:29), </span></span>
+<span id="cb53-113"><a href="#cb53-113" aria-hidden="true" tabindex="-1"></a><span class="co">#          c(1:31), c(1:30), </span></span>
+<span id="cb53-114"><a href="#cb53-114" aria-hidden="true" tabindex="-1"></a><span class="co">#          c(1:31), c(1:30), </span></span>
+<span id="cb53-115"><a href="#cb53-115" aria-hidden="true" tabindex="-1"></a><span class="co">#          c(1:31), c(1:31))</span></span>
+<span id="cb53-116"><a href="#cb53-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-117"><a href="#cb53-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-118"><a href="#cb53-118" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(full_table<span class="sc">$</span>Month)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>12/6/2017                                                            Registro Demográfico - División de Calidad y Estadísticas Vitales
-
-                              16-17
-SEP     Y2015 Y2016 Y2017      Diff.
-    1        75    75    92       17
-    2        77    67    69        2                                                                                 Defunciones Ocurridas en Septiembre por Día y Año
-    3        67    78    78        0
-                                                       140
-    4        71    99    84      -15
-    5        62    89    75      -14
-                                                       120
-    6        77    74    80        6
-    7        85    67    87       20
-                                                       100
-    8        84    77    93       16
-    9        79    90    72      -18
-   10        66    73    98       25                    80
-   11        92    78    92       14
-   12        79    66    77       11                    60
-   13        81    88   100       12
-   14        70    81    80       -1                    40
-   15        87    91    83       -8
-   16        70    71    77        6                    20
-   17        70    68    85       17
-   18        76    79    77       -2                     0
-   19        81    82    74       -8                            1       2     3      4      5      6         7   8      9   10    11   12    13      14   15   16   17    18     19   20   21   22   23   24   25   26   27   28   29   30
-   20        69    79   100       21
-                                                        Registro Demográfico - División de Calidad y Estadísticas Vitales                    Y2015         Y2016         Y2017
-   21        70    67   120       53
-   22        68    97   110       13
-   23        70    71   109       38
-   24        78    79   120       41
-   25        60    75   135       60
-   26        76    82   131       49
-   27        78    82   120       38
-   28        84    81   109       28
-   29        83    70   127       57
-   30        73    91   129       38
-Total     2258  2367   2883     516
-Avg          75    79    96            Avg Sep 1-19, 2017          83       Dif. 16vs17                 80
-Max          92    99   135            Avg Sep 20-30,2017         119       Dif. 16vs17                436
-Min          60    66    69
-Med          76    79    92            NOTA:
-AveD       6.18  7.10 17.25            *Y2017 - Certificados de Defunción registrados en sistema del RD hasta:                   12/6/2017</code></pre>
+<pre><code>
+Apr Aug Dec Feb Jan Jul Jun Mar May Nov Oct Sep 
+ 30  31  31  29  31  31  30  31  31  30  31  30 </code></pre>
 </div>
 </div>
 </section>
