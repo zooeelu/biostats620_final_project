@@ -302,8 +302,8 @@ override using the `.groups` argument.</code></pre>
 <p>Considering the population size of Puerto Rico from 1985 to 2022, we see differing trends across age groups. For both males and females, the population size for older age groups is increasing, while younger age groups are decreasing. We see this particularly in the 0-4 age group for both sexes.</p>
 <p>When examining the general trend in mortality rates over time, we see a decrease from 1985 to 2016. This could help to explain why we see increased population sizes for older age groups, potentially due to healthier lifestyles and improvements in medical care access and quality.</p>
 </section>
-<section id="question-2-4-expected-mortality-before-2017-excess-mortality-for-2017-2018" class="level2">
-<h2 class="anchored" data-anchor-id="question-2-4-expected-mortality-before-2017-excess-mortality-for-2017-2018">Question 2 &amp; 4: Expected mortality Before 2017 &amp; Excess Mortality for 2017-2018</h2>
+<section id="question-2-expected-mortality-before-2017" class="level2">
+<h2 class="anchored" data-anchor-id="question-2-expected-mortality-before-2017">Question 2: Expected mortality Before 2017</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> weekly_deaths <span class="sc">%&gt;%</span> </span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># looking at trends/ estimate what a typical week looks like across years</span></span>
@@ -544,10 +544,8 @@ override using the `.groups` argument.</code></pre>
 </div>
 </div>
 </div>
-<section id="model-fitting" class="level3">
-<h3 class="anchored" data-anchor-id="model-fitting">Model Fitting:</h3>
-<section id="linear-model" class="level4">
-<h4 class="anchored" data-anchor-id="linear-model">Linear Model:</h4>
+<section id="linear-model" class="level3">
+<h3 class="anchored" data-anchor-id="linear-model">Linear Model:</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pre-2017 data</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>model_dataset <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
@@ -555,15 +553,9 @@ override using the `.groups` argument.</code></pre>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new))</span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2017-2018 data used for prediction</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&gt;=</span> <span class="dv">2017</span> <span class="sc">&amp;</span> mmwr_year <span class="sc">&lt;=</span> <span class="dv">2018</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new))</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co"># linear model fit on data before 2017</span></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>linear <span class="ot">&lt;-</span> <span class="fu">lm</span>(rate <span class="sc">~</span> population <span class="sc">+</span> mmwr_week <span class="sc">+</span> age <span class="sc">+</span> sex, <span class="at">data =</span> model_dataset)</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(linear)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># linear model fit on data before 2017</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>linear <span class="ot">&lt;-</span> <span class="fu">lm</span>(rate <span class="sc">~</span> population <span class="sc">+</span> mmwr_week <span class="sc">+</span> age <span class="sc">+</span> sex, <span class="at">data =</span> model_dataset)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(linear)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -596,23 +588,22 @@ F-statistic: 2.46e+04 on 6 and 13353 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre><code>[1] 0.08787425</code></pre>
 </div>
 </div>
-<section id="linear-model-diagnostics" class="level5">
-<h5 class="anchored" data-anchor-id="linear-model-diagnostics">Linear Model Diagnostics</h5>
+<section id="linear-model-diagnostics" class="level4">
+<h4 class="anchored" data-anchor-id="linear-model-diagnostics">Linear Model Diagnostics</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#clusters in chart?</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(linear, which = 1)</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(linear, which = 2)</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>resids <span class="ot">&lt;-</span> <span class="fu">residuals</span>(linear)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># QQ plot</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">residuals =</span> resids), <span class="fu">aes</span>(<span class="at">sample =</span> residuals)) <span class="sc">+</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_qq</span>(<span class="at">size =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_qq_line</span>(<span class="at">color =</span> <span class="st">"orange"</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span>  </span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normal Q-Q Plot of Model Residuals"</span>,</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Theoretical Quantiles"</span>,</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Sample Quantiles"</span>) <span class="sc">+</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(linear, which = 1)</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(linear, which = 2)</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>resids <span class="ot">&lt;-</span> <span class="fu">residuals</span>(linear)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># QQ plot</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">residuals =</span> resids), <span class="fu">aes</span>(<span class="at">sample =</span> residuals)) <span class="sc">+</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_qq</span>(<span class="at">size =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_qq_line</span>(<span class="at">color =</span> <span class="st">"orange"</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span>  </span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Normal Q-Q Plot of Model Residuals"</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Theoretical Quantiles"</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Sample Quantiles"</span>) <span class="sc">+</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
 ℹ Please use `linewidth` instead.</code></pre>
@@ -651,73 +642,17 @@ F-statistic: 2.46e+04 on 6 and 13353 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <p>Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome (rate).</p>
 </section>
-<section id="linear-model-prediction" class="level5">
-<h5 class="anchored" data-anchor-id="linear-model-prediction">Linear Model Prediction</h5>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># use linear model to predict data 2017 and after</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>predict_dataset<span class="sc">$</span>predicted_rate <span class="ot">&lt;-</span> <span class="fu">predict</span>(linear, <span class="at">newdata =</span> predict_dataset)</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># excess mortality (obs - predicted)</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span> </span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predicted_deaths =</span> predicted_rate <span class="sc">*</span> population,</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_mortality =</span> rate <span class="sc">-</span> predicted_rate, </span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_deaths =</span> total_deaths <span class="sc">-</span> predicted_deaths)</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co"># comparing true vs expected predicted rate (excess mortality)</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mmwr_label =</span> <span class="fu">paste0</span>(mmwr_year, <span class="st">"-W"</span>, stringr<span class="sc">::</span><span class="fu">str_pad</span>(mmwr_week, <span class="dv">2</span>, <span class="at">pad =</span> <span class="st">"0"</span>)))</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co"># observed vs fitted plots</span></span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(predict_dataset, <span class="fu">aes</span>(<span class="at">x =</span> rate, <span class="at">y =</span> predicted_rate, <span class="at">color =</span> agegroup_new)) <span class="sc">+</span></span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Observed vs Predicted Mortality Rate"</span>,</span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Observed Rate"</span>, <span class="at">y =</span> <span class="st">"Predicted Rate"</span>) <span class="sc">+</span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="1152"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot of excess mortality over weeks</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>plot_df <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span> </span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mmwr_year, mmwr_week) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">week_index =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(week_index, rate, predicted_rate, sex, agegroup_new) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"rate"</span>, <span class="st">"predicted_rate"</span>), </span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"type"</span>, </span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"mortality_rate"</span>)</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(<span class="at">x =</span> week_index, <span class="at">y =</span> mortality_rate, <span class="at">color =</span> type)) <span class="sc">+</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.7</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(sex <span class="sc">~</span> agegroup_new) <span class="sc">+</span></span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Observed vs. Predicted Mortality by Age Group and Sex"</span>, </span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Mortality Rate"</span>,</span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week Index"</span>) <span class="sc">+</span></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="1152"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>In addition to the model violating the linear model assumptions, we can see that the model does not predcit well and a better suited model should be used. From the Predicted vs Observed Rates plot, we can see that for the most part, the linear model is overestimating the actual mortality rate. There seems to be more week to week variation in actual mortality for the 65-84 and 85+ age groups which the model is also not fully capturing.</p>
 </section>
-</section>
-<section id="log-linear-model" class="level4">
-<h4 class="anchored" data-anchor-id="log-linear-model">Log-Linear Model:</h4>
+<section id="log-linear-model" class="level3">
+<h3 class="anchored" data-anchor-id="log-linear-model">Log-Linear Model:</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#do we need year for both plots? or should we limit year?</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>log_linear <span class="ot">&lt;-</span> <span class="fu">glm</span>(total_deaths <span class="sc">~</span> mmwr_week <span class="sc">+</span> agegroup_new <span class="sc">+</span> sex, </span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">offset =</span> <span class="fu">log</span>(population), </span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> poisson, </span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> new_dat)</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(log_linear)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#do we need year for both plots? or should we limit year?</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>log_linear <span class="ot">&lt;-</span> <span class="fu">glm</span>(total_deaths <span class="sc">~</span> mmwr_week <span class="sc">+</span> agegroup_new <span class="sc">+</span> sex, </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">offset =</span> <span class="fu">log</span>(population), </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> poisson, </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> new_dat)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(log_linear)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -747,104 +682,373 @@ AIC: 156826
 
 Number of Fisher Scoring iterations: 4</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#GOF: prob of observing this deviance value given the df</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">-</span><span class="fu">pchisq</span>(log_linear<span class="sc">$</span>deviance, log_linear<span class="sc">$</span>df.residual)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#GOF: prob of observing this deviance value given the df</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">-</span><span class="fu">pchisq</span>(log_linear<span class="sc">$</span>deviance, log_linear<span class="sc">$</span>df.residual)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
 </div>
-<p>We next fit a log-linear model with mmwr_week, age, and sex again as predictors. We again seek to predict weekly death rate, this time modeling total deaths and using an offset equal to population size for a given week, gender, age, and year. Univariate Wald tests show that each coefficient is significantly associated with our outcome of interest, and a comparison of null and residual deviances shows that our model fits significantly better than the intercept-only model (LRT: 1225348 on 5 degrees of freedom)</p>
+<p>We next fit a log-linear model with mmwr_week, age, and sex again as predictors. We again seek to predict weekly death rate, this time modeling total deaths and using an offset equal to population size for a given week, gender, age, and year. Univariate Wald tests show that each coefficient is significantly associated with our outcome of interest, and a comparison of null and residual deviances shows that our model fits significantly better than the intercept-only model (LRT: 1225348 on 5 degrees of freedom).</p>
 <p>Goodness of Fit: Under the null, the residual deviance should be distributed as a <span class="math inline">\(X^2\)</span> random variable with degrees of freedom equal to the model’s residual degrees of freedom, 15858. We observe a residual deviance value of 66290. The probability of observing such a residual deviance value given that the fit model holds is essentially zero, indicating a lack of model fit.</p>
-<p>#####Assessing for Overdispersion:</p>
+<p>####Assessing for Overdispersion:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#gaps in chart again?</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(log_linear, <span class="at">which =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#gaps in chart again?</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(log_linear, <span class="at">which =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>overdisp <span class="ot">&lt;-</span> log_linear<span class="sc">$</span>deviance<span class="sc">/</span>log_linear<span class="sc">$</span>df.residual</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>overdisp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>overdisp <span class="ot">&lt;-</span> log_linear<span class="sc">$</span>deviance<span class="sc">/</span>log_linear<span class="sc">$</span>df.residual</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>overdisp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 4.180209</code></pre>
 </div>
 </div>
-<p>There is an upward trend in the scale-location plot for predicted values vs standardized pearson residuals. In a well-fitting model, the ratio of residual deviance to the degrees of freedom should be approximately 1 since the poisson distribution assumes that the mean and variance are exactly equal. In this case, the ratio value is 4.18 indicating that overdispersion is present in our data and that we may be underestimating the standard error of our data.</p>
+<p>There is an upward trend in the scale-location plot for predicted values vs standardized pearson residuals. In a well-fitting model, the ratio of residual deviance to the degrees of freedom should be approximately 1 since the poisson distribution assumes that the mean and variance are exactly equal. In this case, the ratio value is 4.18 indicating that overdispersion is present and that we may be underestimating the standard error of our data.</p>
 </section>
-<section id="negative-binomial-regression" class="level4">
-<h4 class="anchored" data-anchor-id="negative-binomial-regression">Negative Binomial Regression:</h4>
+<section id="negative-binomial-regression" class="level3">
+<h3 class="anchored" data-anchor-id="negative-binomial-regression">Negative Binomial Regression:</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>neg_bin <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(total_deaths <span class="sc">~</span> mmwr_week <span class="sc">+</span> agegroup_new <span class="sc">+</span> sex <span class="sc">+</span> <span class="fu">offset</span>(<span class="fu">log</span>(population)), </span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">link =</span> log,</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> new_dat)</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(neg_bin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>neg_bin <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(total_deaths <span class="sc">~</span> mmwr_week <span class="sc">+</span> agegroup_new <span class="sc">+</span> sex <span class="sc">+</span> agegroup_new<span class="sc">*</span>sex <span class="sc">+</span> <span class="fu">offset</span>(<span class="fu">log</span>(population)), </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">link =</span> log,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> new_dat)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(neg_bin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
 glm.nb(formula = total_deaths ~ mmwr_week + agegroup_new + sex + 
-    offset(log(population)), data = new_dat, link = log, init.theta = 20.89443824)
+    agegroup_new * sex + offset(log(population)), data = new_dat, 
+    link = log, init.theta = 35.85585564)
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--3.7989  -0.8262  -0.1070   0.6459   6.6791  
+-3.8543  -0.7722  -0.0387   0.6543   8.0774  
 
 Coefficients:
-                    Estimate Std. Error   z value Pr(&gt;|z|)    
-(Intercept)       -9.5835000  0.0072995 -1312.893  &lt; 2e-16 ***
-mmwr_week         -0.0007073  0.0001396    -5.068 4.03e-07 ***
-agegroup_new25-64  1.9979269  0.0070224   284.506  &lt; 2e-16 ***
-agegroup_new65-84  3.2959496  0.0069163   476.548  &lt; 2e-16 ***
-agegroup_new85+    3.3679468  0.0070526   477.544  &lt; 2e-16 ***
-sexmale            0.5196172  0.0042149   123.280  &lt; 2e-16 ***
+                            Estimate Std. Error   z value Pr(&gt;|z|)    
+(Intercept)               -9.7259535  0.0094328 -1031.080  &lt; 2e-16 ***
+mmwr_week                 -0.0007770  0.0001159    -6.702 2.06e-11 ***
+agegroup_new25-64          1.9363082  0.0102198   189.466  &lt; 2e-16 ***
+agegroup_new65-84          3.4877853  0.0099172   351.692  &lt; 2e-16 ***
+agegroup_new85+            3.6740929  0.0100350   366.126  &lt; 2e-16 ***
+sexmale                    0.7606957  0.0111159    68.433  &lt; 2e-16 ***
+agegroup_new25-64:sexmale  0.1212304  0.0129411     9.368  &lt; 2e-16 ***
+agegroup_new65-84:sexmale -0.3432639  0.0126542   -27.127  &lt; 2e-16 ***
+agegroup_new85+:sexmale   -0.6036123  0.0129586   -46.580  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-(Dispersion parameter for Negative Binomial(20.8944) family taken to be 1)
+(Dispersion parameter for Negative Binomial(35.8559) family taken to be 1)
 
-    Null deviance: 321563  on 15863  degrees of freedom
-Residual deviance:  16776  on 15858  degrees of freedom
-AIC: 128143
+    Null deviance: 465078  on 15863  degrees of freedom
+Residual deviance:  16598  on 15855  degrees of freedom
+AIC: 122573
 
 Number of Fisher Scoring iterations: 1
 
-              Theta:  20.894 
-          Std. Err.:  0.335 
+              Theta:  35.856 
+          Std. Err.:  0.648 
 
- 2 x log-likelihood:  -128128.879 </code></pre>
+ 2 x log-likelihood:  -122552.939 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">-</span><span class="fu">pchisq</span>(neg_bin<span class="sc">$</span>deviance, neg_bin<span class="sc">$</span>df.residual)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">-</span><span class="fu">pchisq</span>(neg_bin<span class="sc">$</span>deviance, neg_bin<span class="sc">$</span>df.residual)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 2.073681e-07</code></pre>
+<pre><code>[1] 1.940181e-05</code></pre>
 </div>
 </div>
-<p>Comparing this model with the log-linear model, we can see that the likelihood ratio statistic is now 304787 on 5 degrees of freedom, showing that this model has a better fit than the log-linear model. However, the probability of observing such a residual deviance value given that the fit model holds is still very low, indicating a lack of model fit despite its improvements over the log-linear model.</p>
-</section>
+<p>Comparing this model with the log-linear model on AIC, we conclude that the negative binomial model fits better given its lower AIC value (156826 vs 122573). However, the probability of observing such a residual deviance value given that the fit model holds is still very low (p = 1.940181e-05), indicating a lack of model fit despite improvements.</p>
 <section id="check-for-autocorrelation" class="level4">
 <h4 class="anchored" data-anchor-id="check-for-autocorrelation">Check for Autocorrelation:</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#can do a correlation heat map here to justify hierarchical model</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#can do a correlation heat map here to justify hierarchical model</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="expected-mortality-by-week-with-standard-deviations" class="level4">
+<h4 class="anchored" data-anchor-id="expected-mortality-by-week-with-standard-deviations">Expected Mortality by Week with Standard Deviations:</h4>
+</section>
+</section>
+</section>
+<section id="question-3-periods-with-excess-mortality-before-2018" class="level2">
+<h2 class="anchored" data-anchor-id="question-3-periods-with-excess-mortality-before-2018">Question 3: Periods with Excess Mortality Before 2018</h2>
+<section id="linear-model-1" class="level3">
+<h3 class="anchored" data-anchor-id="linear-model-1">Linear Model</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Looking only at data before 20178 </span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>predict_pre <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&lt;=</span> <span class="dv">2017</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mmwr_year, mmwr_week) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new),</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">week_index =</span> <span class="fu">row_number</span>())</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="co"># getting predictions</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>predict_pre<span class="sc">$</span>predicted_rate <span class="ot">&lt;-</span> <span class="fu">predict</span>(linear, <span class="at">newdata =</span> predict_pre)</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="co"># excess mortality (obs - predicted)</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>predict_pre <span class="ot">&lt;-</span> predict_pre <span class="sc">%&gt;%</span> </span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predicted_deaths =</span> predicted_rate <span class="sc">*</span> population,</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_mortality =</span> rate <span class="sc">-</span> predicted_rate, </span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_deaths =</span> total_deaths <span class="sc">-</span> predicted_deaths)</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a><span class="co">#observed v fitted over time: looking at sex differences</span></span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>predict_pre <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> week_index, <span class="at">y =</span> excess_mortality)) <span class="sc">+</span></span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">color =</span> sex, <span class="at">group =</span> sex), <span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">span =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Excess Mortality over Time: Before 2018"</span>,</span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Differences by Sex"</span>,</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week"</span>, <span class="at">y =</span> <span class="st">"Excess Mortality"</span>,</span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">'Sex'</span>) <span class="sc">+</span></span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>predict_pre <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> week_index, <span class="at">y =</span> excess_mortality)) <span class="sc">+</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">color =</span> agegroup_new, <span class="at">group =</span> agegroup_new), <span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">span =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Excess Mortality over Time: Before 2019"</span>,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">'Differences by Age Group'</span>,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week"</span>, <span class="at">y =</span> <span class="st">"Excess Mortality"</span>,</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">'Age Group'</span>) <span class="sc">+</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="negative-binomial-model" class="level3">
+<h3 class="anchored" data-anchor-id="negative-binomial-model">Negative Binomial Model</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Looking only at data before 2018 </span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>predictnb_pre <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&lt;=</span> <span class="dv">2017</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mmwr_year, mmwr_week) <span class="sc">%&gt;%</span> </span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new),</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">week_index =</span> <span class="fu">row_number</span>())</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="co"># use nb model to predict rates for data before 2018</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>predictnb_pre<span class="sc">$</span>predicted_rate <span class="ot">&lt;-</span> <span class="fu">predict</span>(neg_bin, <span class="at">type =</span> <span class="st">'response'</span>, <span class="at">newdata =</span> predictnb_pre) <span class="sc">/</span> predictnb_pre<span class="sc">$</span>population</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="co"># excess mortality (obs - predicted)</span></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>predictnb_pre <span class="ot">&lt;-</span> predictnb_pre <span class="sc">%&gt;%</span> </span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">true_rate =</span> total_deaths<span class="sc">/</span>population,</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_mortality =</span> true_rate <span class="sc">-</span> predicted_rate)</span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a><span class="co">#observed v fitted over time: looking at sex differences</span></span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>predictnb_pre <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> week_index, <span class="at">y =</span> excess_mortality)) <span class="sc">+</span></span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">color =</span> sex, <span class="at">group =</span> sex), <span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">span =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Excess Mortality over Time: Before 2018"</span>,</span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Differences by Sex"</span>,</span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week"</span>, <span class="at">y =</span> <span class="st">"Excess Mortality"</span>,</span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">'Sex'</span>)<span class="sc">+</span></span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>predictnb_pre <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> week_index, <span class="at">y =</span> excess_mortality)) <span class="sc">+</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">color =</span> agegroup_new, <span class="at">group =</span> agegroup_new), <span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">span =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Excess Mortality over Time: Before 2019"</span>,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">'Differences by Age Group'</span>,</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week"</span>, <span class="at">y =</span> <span class="st">"Excess Mortality"</span>,</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">'Age Group'</span>) <span class="sc">+</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-12-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Based on the predictions from the linear and negative binomial models, there appears to be excess mortality in the year 1985. This is particularly seen in older age demographics.</p>
+</section>
+</section>
+<section id="question-4-predictions-for-2017-2018" class="level2">
+<h2 class="anchored" data-anchor-id="question-4-predictions-for-2017-2018">Question 4: Predictions for 2017-2018</h2>
+<section id="linear-prediction" class="level3">
+<h3 class="anchored" data-anchor-id="linear-prediction">Linear Prediction</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2017-2018 data used for prediction</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&gt;=</span> <span class="dv">2017</span> <span class="sc">&amp;</span> mmwr_year <span class="sc">&lt;=</span> <span class="dv">2018</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rate =</span> total_deaths<span class="sc">/</span>population, </span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new))</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="co"># use linear model to predict data 2017 and after</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>predict_dataset<span class="sc">$</span>predicted_rate <span class="ot">&lt;-</span> <span class="fu">predict</span>(linear, <span class="at">newdata =</span> predict_dataset)</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="co"># excess mortality (obs - predicted)</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span> </span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predicted_deaths =</span> predicted_rate <span class="sc">*</span> population,</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_mortality =</span> rate <span class="sc">-</span> predicted_rate, </span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_deaths =</span> total_deaths <span class="sc">-</span> predicted_deaths)</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="co"># comparing true vs expected predicted rate (excess mortality)</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>predict_dataset <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mmwr_label =</span> <span class="fu">paste0</span>(mmwr_year, <span class="st">"-W"</span>, stringr<span class="sc">::</span><span class="fu">str_pad</span>(mmwr_week, <span class="dv">2</span>, <span class="at">pad =</span> <span class="st">"0"</span>)))</span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a><span class="co"># observed vs fitted plots</span></span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(predict_dataset, <span class="fu">aes</span>(<span class="at">x =</span> rate, <span class="at">y =</span> predicted_rate, <span class="at">color =</span> agegroup_new)) <span class="sc">+</span></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Observed vs Predicted Mortality Rate"</span>,</span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Observed Rate"</span>, <span class="at">y =</span> <span class="st">"Predicted Rate"</span>,</span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">'Age Group'</span>) <span class="sc">+</span></span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot of excess mortality over weeks</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>plot_df <span class="ot">&lt;-</span> predict_dataset <span class="sc">%&gt;%</span> </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mmwr_year, mmwr_week) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">week_index =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(week_index, rate, predicted_rate, sex, agegroup_new) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"rate"</span>, <span class="st">"predicted_rate"</span>), </span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"type"</span>, </span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"mortality_rate"</span>)</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(<span class="at">x =</span> week_index, <span class="at">y =</span> mortality_rate, <span class="at">color =</span> type)) <span class="sc">+</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.7</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(sex <span class="sc">~</span> agegroup_new) <span class="sc">+</span></span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Observed vs. Predicted Mortality by Age Group and Sex"</span>, </span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Mortality Rate"</span>,</span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week Index"</span>) <span class="sc">+</span></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In addition to the model violating the linear model assumptions, we can see that the model does not predict well and a better suited model should be used. From the Predicted vs Observed Rates plot, we can see that for the most part, the linear model is overestimating the actual mortality rate. There seems to be more week to week variation in actual mortality for the 65-84 and 85+ age groups which the model is also not fully capturing.</p>
+</section>
+<section id="negative-binomal-prediction" class="level3">
+<h3 class="anchored" data-anchor-id="negative-binomal-prediction">Negative Binomal Prediction:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2017-2018 data used for prediction</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>predict_nb <span class="ot">&lt;-</span> new_dat <span class="sc">%&gt;%</span> </span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mmwr_year <span class="sc">&gt;=</span> <span class="dv">2017</span> <span class="sc">&amp;</span> mmwr_year <span class="sc">&lt;=</span> <span class="dv">2018</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age =</span> <span class="fu">as.factor</span>(agegroup_new))</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="co"># use nb model to predict data 2017 and after</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>predict_nb<span class="sc">$</span>predicted_rate <span class="ot">&lt;-</span> <span class="fu">predict</span>(neg_bin, <span class="at">type =</span> <span class="st">'response'</span>, <span class="at">newdata =</span> predict_nb) <span class="sc">/</span> predict_nb<span class="sc">$</span>population</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="co"># excess mortality (obs - predicted)</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>predict_nb <span class="ot">&lt;-</span> predict_nb <span class="sc">%&gt;%</span> </span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">true_rate =</span> total_deaths<span class="sc">/</span>population,</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">excess_mortality =</span> true_rate <span class="sc">-</span> predicted_rate)</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a><span class="co"># comparing true vs expected predicted rate (excess mortality)</span></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>predict_nb <span class="ot">&lt;-</span> predict_nb <span class="sc">%&gt;%</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mmwr_label =</span> <span class="fu">paste0</span>(mmwr_year, <span class="st">"-W"</span>, stringr<span class="sc">::</span><span class="fu">str_pad</span>(mmwr_week, <span class="dv">2</span>, <span class="at">pad =</span> <span class="st">"0"</span>)))</span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a><span class="co"># observed vs fitted plots</span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(predict_nb, <span class="fu">aes</span>(<span class="at">x =</span> true_rate, <span class="at">y =</span> predicted_rate, <span class="at">color =</span> agegroup_new)) <span class="sc">+</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Observed vs Predicted Mortality Rate: Negative Binomial Model"</span>,</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Observed Rate"</span>, <span class="at">y =</span> <span class="st">"Predicted Rate"</span>,</span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">'Age Group'</span>) <span class="sc">+</span></span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="excess-mortality-over-time" class="level3">
+<h3 class="anchored" data-anchor-id="excess-mortality-over-time">Excess Mortality over Time</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co">#observed v fitted over time: looking at sex differences</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>predict_nb <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mmwr_week, <span class="at">y =</span> excess_mortality)) <span class="sc">+</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">color =</span> sex, <span class="at">group =</span> sex), <span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">span =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>mmwr_year) <span class="sc">+</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Excess Mortality over Time: Negative Binomial Model"</span>,</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Differences in Excess Mortality by Sex"</span>,</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week"</span>, <span class="at">y =</span> <span class="st">"Excess Mortality"</span>,</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">'Sex'</span>) <span class="sc">+</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">#observed v fitted over time: looking at age group differences</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>predict_nb <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mmwr_week, <span class="at">y =</span> excess_mortality)) <span class="sc">+</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">color =</span> agegroup_new, <span class="at">group =</span> agegroup_new), <span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">span =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>mmwr_year) <span class="sc">+</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Excess Mortality over Time: Negative Binomial Model"</span>,</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Differences in Excess Mortality by Age Group"</span>,</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Week"</span>, <span class="at">y =</span> <span class="st">"Excess Mortality"</span>,</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">'Age Group'</span>) <span class="sc">+</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="biostats620_final_project_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
 </div>
 </section>
 </section>
-</section>
-<section id="comparison-of-nyt-data-and-excessmort-data" class="level2">
-<h2 class="anchored" data-anchor-id="comparison-of-nyt-data-and-excessmort-data">Comparison of NYT Data and excessmort Data</h2>
+<section id="question-5-comparison-of-nyt-data-and-excessmort-data" class="level2">
+<h2 class="anchored" data-anchor-id="question-5-comparison-of-nyt-data-and-excessmort-data">Question 5: Comparison of NYT Data and excessmort Data</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>pdf_url <span class="ot">&lt;-</span> <span class="st">"https://github.com/c2-d2/pr_mort_official/raw/master/data/Mortalidad-RegDem-2015-17-NYT-part1.pdf"</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Download PDF to a temporary file</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>temp_file <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".pdf"</span>)</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(pdf_url, temp_file, <span class="at">mode =</span> <span class="st">"wb"</span>)</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="co"># extract text from PDF</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>pdf_text_data <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(temp_file)</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="co"># view first page of pdf file</span></span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(pdf_text_data[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>pdf_url <span class="ot">&lt;-</span> <span class="st">"https://github.com/c2-d2/pr_mort_official/raw/master/data/Mortalidad-RegDem-2015-17-NYT-part1.pdf"</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Download PDF to a temporary file</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>temp_file <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".pdf"</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(pdf_url, temp_file, <span class="at">mode =</span> <span class="st">"wb"</span>)</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a><span class="co"># extract text from PDF</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>pdf_text_data <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(temp_file)</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a><span class="co"># view first page of pdf file</span></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(pdf_text_data[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>12/6/2017                                                            Registro Demográfico - División de Calidad y Estadísticas Vitales
 

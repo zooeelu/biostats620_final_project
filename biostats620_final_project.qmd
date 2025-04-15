@@ -9,6 +9,7 @@ library(kableExtra)
 library(lubridate)
 library(MASS)
 library(pdftools)
+library(tabulapdf)
 ```
 
 ## Question 1: Population Sizes by Age Group and Sex
@@ -405,8 +406,10 @@ predict_nb %>% ggplot(aes(x = mmwr_week, y = excess_mortality)) +
 
 
 ## Question 5: Comparison of NYT Data and excessmort Data
-```{r}
+```{r, warning = FALSE, message = FALSE}
 pdf_url <- "https://github.com/c2-d2/pr_mort_official/raw/master/data/Mortalidad-RegDem-2015-17-NYT-part1.pdf"
+
+# View(extract_tables(pdf_url, pages = 1)[[1]])
 
 # Download PDF to a temporary file
 temp_file <- tempfile(fileext = ".pdf")
@@ -416,7 +419,97 @@ download.file(pdf_url, temp_file, mode = "wb")
 pdf_text_data <- pdf_text(temp_file)
 
 # view first page of pdf file
-cat(pdf_text_data[1])
+# cat(pdf_text_data[1])
+
+extract_table_from_page <- function(page_text) {
+  lines <- strsplit(page_text, "\n")[[1]]
+  lines <- trimws(lines)
+  
+  # Keep lines that start with day numbers (1-31)
+  table_lines <- grep("^\\d{1,2}\\s", lines, value = TRUE)
+  
+  # Split on 2+ spaces, assuming table is aligned that way
+  split_lines <- str_split_fixed(table_lines, "\\s{2,}", 5)
+  
+  colnames(split_lines) <- c("Day", "Y2015", "Y2016", "Y2017", "Diff")
+  
+  # Convert to a tibble and clean up
+  as_tibble(split_lines) %>%
+    mutate(across(everything(), str_trim)) %>%
+    mutate(across(-Day, ~ as.numeric(str_replace_all(., "[^0-9\\.-]", ""))))
+}
+
+# Apply the extraction function to each page
+tables_list <- lapply(pdf_text_data, extract_table_from_page)
+
+# Combine into one data frame
+full_table <- bind_rows(tables_list, .id = "Page")
+full_table <- full_table %>% 
+  mutate(Month = ifelse(Page == 1, "Sep",
+                        ifelse(Page == 2, "Oct",
+                               ifelse(Page == 3, "Nov",
+                                      ifelse(Page == 4, "Dec",
+                                             ifelse(Page == 5, "Jan",
+                                                    ifelse(Page == 6, "Feb",
+                                                           ifelse(Page == 7, "Mar", 
+                                                                  ifelse(Page == 8, "Apr",
+                                                                         ifelse(Page == 9, "May",
+                                                                                ifelse(Page == 10, "Jun",
+                                                                                       ifelse(Page == 11, "Jul", "Aug")))))))))))) %>% 
+  dplyr::select(Page, Month, Y2015, Y2016, Y2016, Y2017, Diff) %>% 
+  rownames_to_column("index")
+
+# fixing nov data
+full_table <- full_table %>% 
+  filter(!(index %in% c(84:88)))
+
+# fixing dec data 
+full_table[full_table$Page == 4, "Y2017"] <- 0
+full_table <- full_table %>% 
+  filter(!(index %in% c(115)))
+
+# fixing jan data
+full_table <- full_table %>% 
+  filter(!(index %in% c(147)))
+
+# fixing feb data
+full_table <- full_table %>% 
+  filter(!(index %in% c(179)))
+
+full_table[full_table$index == 190, "Y2015"] <- NA
+full_table[full_table$index == 190, "Y2016"] <- 70
+
+# fixing march data
+full_table <- full_table %>% 
+  filter(!(index %in% c(209)))
+
+# fixing april data
+full_table <- full_table %>% 
+  filter(!(index %in% c(241)))
+
+# fixing may data
+full_table <- full_table %>% 
+  filter(!(index %in% c(272)))
+
+# fixing june date
+full_table <- full_table %>% 
+  filter(!(index %in% c(306)))
+
+# fixing july date
+full_table <- full_table %>% 
+  filter(!(index %in% c(335)))
+
+# fixing aug date
+full_table <- full_table %>% 
+  filter(!(index %in% c(367)))
+
+# View(full_table[full_table$Page == 12, ]) 
+
+full_table <- full_table %>% 
+  mutate(diff = Y2017 - Y2016, day = c()) %>% 
+  dplyr:: select(Month, Y2015, Y2016, Y2017, diff)
+
+table(full_table$Month)
 ```
 
 
