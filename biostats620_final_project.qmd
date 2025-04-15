@@ -506,8 +506,23 @@ full_table <- full_table %>%
 # View(full_table[full_table$Page == 12, ]) 
 
 full_table <- full_table %>% 
-  mutate(diff = Y2017 - Y2016, day = c()) %>% 
-  dplyr:: select(Month, Y2015, Y2016, Y2017, diff)
+  mutate(diff = Y2017 - Y2016,
+         Page = as.numeric(Page),
+         day = c(c(1:30), c(1:31),
+         c(1:30), c(1:31), 
+         c(1:31), c(1:29), 
+         c(1:31), c(1:30), 
+         c(1:31), c(1:30), 
+         c(1:31), c(1:31))) %>% 
+  dplyr:: select(Month, day, Y2015, Y2016, Y2017, diff)
+
+# day <- c(c(1:30), c(1:31),
+#          c(1:30), c(1:31), 
+#          c(1:31), c(1:29), 
+#          c(1:31), c(1:30), 
+#          c(1:31), c(1:30), 
+#          c(1:31), c(1:31))
+
 
 table(full_table$Month)
 ```
