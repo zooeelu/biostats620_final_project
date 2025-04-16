@@ -112,7 +112,6 @@ t3 %>%
   facet_wrap(~ agegroup_new, scales = "free_y")
 ```
 
-
 ### Linear Model: 
 ```{r}
 # pre-2017 data
@@ -129,6 +128,17 @@ summary(linear)
 perc_negative <- mean(linear$fitted.values < 0)
 perc_negative
 ``` 
+
+#### Table of Expected Mortality and SD of Expected Mortality 
+```{r}
+t4 <- model_dataset %>% 
+  mutate(fitted = linear$fitted.values) %>% 
+  group_by(mmwr_week, age, sex) %>% 
+  summarise(exp_mortality = mean(fitted), 
+            sd_exp_mortality = sd(fitted))
+
+kable(head(t4))
+```
 
 #### Linear Model Diagnostics
 ```{r}
@@ -160,10 +170,10 @@ ggplot(model_df, aes(x = fitted, y = residuals)) +
        x = "Fitted Values",
        y = "Residuals") +
   theme_minimal()
-
 ```
 
 Fitting a linear model, we see issues such as violations of homoskedasticity (funnel shape) and normality (tails of qq plot). We also see negative predictions for a non-negative outcome (rate). 
+
 
 ### Log-Linear Model:
 ```{r}
@@ -242,7 +252,7 @@ predict_pre <- predict_pre %>%
 #observed v fitted over time: looking at sex differences
 predict_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
   geom_smooth(aes(color = sex, group = sex), method = "loess", se = FALSE, span = 0.1) +
-  labs(title = "Excess Mortality over Time: Before 2018",
+  labs(title = "Excess Mortality over Time with Linear Model: Before 2018",
        subtitle = "Differences by Sex",
        x = "Week", y = "Excess Mortality",
        color = 'Sex') +
@@ -250,7 +260,7 @@ predict_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
 
 predict_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
   geom_smooth(aes(color = agegroup_new, group = agegroup_new), method = "loess", se = FALSE, span = 0.1) +
-  labs(title = "Excess Mortality over Time: Before 2019",
+  labs(title = "Excess Mortality over Time with Linear Model: Before 2019",
        subtitle = 'Differences by Age Group',
        x = "Week", y = "Excess Mortality",
        color = 'Age Group') +
@@ -278,7 +288,7 @@ predictnb_pre <- predictnb_pre %>%
 #observed v fitted over time: looking at sex differences
 predictnb_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
   geom_smooth(aes(color = sex, group = sex), method = "loess", se = FALSE, span = 0.1) +
-  labs(title = "Excess Mortality over Time: Before 2018",
+  labs(title = "Excess Mortality over Time with Negtive Binomial Model: Before 2018",
        subtitle = "Differences by Sex",
        x = "Week", y = "Excess Mortality",
        color = 'Sex')+
@@ -286,7 +296,7 @@ predictnb_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
 
 predictnb_pre %>% ggplot(aes(x = week_index, y = excess_mortality)) +
   geom_smooth(aes(color = agegroup_new, group = agegroup_new), method = "loess", se = FALSE, span = 0.1) +
-  labs(title = "Excess Mortality over Time: Before 2019",
+  labs(title = "Excess Mortality over Time with Negative Binomial Model: Before 2018",
        subtitle = 'Differences by Age Group',
        x = "Week", y = "Excess Mortality",
        color = 'Age Group') +
@@ -298,56 +308,77 @@ Based on the predictions from the linear and negative binomial models, there app
 
 ## Question 4: Predictions for 2017-2018
 ### Linear Prediction
-```{r, fig.width = 12, fig.height = 8}
+```{r}
 # 2017-2018 data used for prediction
-predict_dataset <- new_dat %>% 
+predict_lm <- new_dat %>% 
   filter(mmwr_year >= 2017 & mmwr_year <= 2018) %>% 
   mutate(rate = total_deaths/population, 
          age = as.factor(agegroup_new))
 
 # use linear model to predict data 2017 and after
-predict_dataset$predicted_rate <- predict(linear, newdata = predict_dataset)
+predict_lm$predicted_rate <- predict(linear, newdata = predict_lm)
 
 # excess mortality (obs - predicted)
-predict_dataset <- predict_dataset %>% 
+predict_lm <- predict_lm %>% 
   mutate(predicted_deaths = predicted_rate * population,
          excess_mortality = rate - predicted_rate, 
          excess_deaths = total_deaths - predicted_deaths)
 
-# comparing true vs expected predicted rate (excess mortality)
-predict_dataset <- predict_dataset %>%
-  mutate(mmwr_label = paste0(mmwr_year, "-W", stringr::str_pad(mmwr_week, 2, pad = "0")))
-
 # observed vs fitted plots
-ggplot(predict_dataset, aes(x = rate, y = predicted_rate, color = agegroup_new)) +
+ggplot(predict_lm, aes(x = rate, y = predicted_rate, color = agegroup_new)) +
   geom_point(alpha = 0.5) +
   geom_abline(intercept = 0, slope = 1, color = "red", size = 0.8) +
-  labs(title = "Observed vs Predicted Mortality Rate",
+  labs(title = "Predicted vs. Observed Mortality Rate",
        x = "Observed Rate", y = "Predicted Rate",
        color = 'Age Group') +
   theme_minimal()
 
 # plot of excess mortality over weeks
-plot_df <- predict_dataset %>% 
+plot_df <- predict_lm %>% 
   arrange(mmwr_year, mmwr_week) %>% 
   mutate(week_index = row_number()) %>% 
-  dplyr::select(week_index, rate, predicted_rate, sex, agegroup_new) %>% 
-  pivot_longer(cols = c("rate", "predicted_rate"), 
-               names_to = "type", 
-               values_to = "mortality_rate")
+  dplyr::select(week_index, rate, predicted_rate, sex, agegroup_new) 
+  # pivot_longer(cols = c("rate", "predicted_rate"), 
+  #              names_to = "type", 
+  #              values_to = "mortality_rate")
 
-ggplot(plot_df, aes(x = week_index, y = mortality_rate, color = type)) +
-  geom_point(size = 0.7, alpha = 0.5) +
+ggplot(plot_df, aes(x = week_index, y = rate)) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 1) +
+  geom_point(aes(x = week_index, y = rate),  alpha = 0.6, color = "pink") +
   facet_grid(sex ~ agegroup_new) +
-  labs(title = "Observed vs. Predicted Mortality by Age Group and Sex", 
-       y = "Mortality Rate",
+  labs(title = "Obs. vs. Fitted Mortality Rates", 
+       y = "Obs. Mortality Rate",
        x = "Week Index") +
   theme_minimal()
 
+# comparing excess mortality by gender
+predict_lm %>% ggplot(aes(x = mmwr_week, y = excess_mortality)) +
+  geom_smooth(aes(color = sex, group = sex), method = "loess", se = FALSE, span = 0.2) +
+  facet_wrap(~mmwr_year) +
+  labs(title = "Excess Mortality over Time: Linear Model",
+       subtitle = "Differences in Excess Mortality by Sex",
+       x = "Week", y = "Excess Mortality",
+       color = 'Sex') +
+  theme_minimal()
+
+# comparing excess mortality by age
+predict_lm %>% ggplot(aes(x = mmwr_week, y = excess_mortality)) +
+  geom_smooth(aes(color = agegroup_new, group = agegroup_new), method = "loess", se = FALSE, span = 0.2) +
+  facet_wrap(~mmwr_year) +
+  labs(title = "Excess Mortality over Time: Linear Model",
+       subtitle = "Differences in Excess Mortality by Age Group",
+       x = "Week", y = "Excess Mortality",
+       color = 'Sex') +
+  theme_minimal()
 ```
 
-In addition to the model violating the linear model assumptions, we can see that the model does not predict well and a better suited model should be used. From the Predicted vs Observed Rates plot, we can see that for the most part, the linear model is overestimating the actual mortality rate. There seems to be more week to week variation in actual mortality for the 65-84 and 85+ age groups which the model is also not fully capturing.
+In addition to the model violating the linear model assumptions, we can see that the model does not predict well and a better suited model should be used. From the Predicted vs Observed Rates plot, we can see that for the most part, the linear model is overestimating the actual mortality rate.
 
+Looking at excess mortality, we can see that almost all throughout 2017-2018, excess mortality was negative for both males and female, again indicating that the linear model was overestimating mortality rates. However, it is obvious that Hurricane Maria made landfall around weeks 38/39 when excess mortality spiked for both males and females (above 0) showing how the linear model then underestimated the mortality rates given the unexpected natural disaster. There is a difference in excess mortality between males and females thoughtout most of 2017-2018 with male excess mortality being lower, perhaps indicating higher baseline mortality predictions for males.
+
+When looking at age groups, we can tell that excess mortality was negative for the part during 2017-2018 with a spike when Hurricane Maria made landfall. The linear model was especially bad at predicting mortality rates for the 0-24 age groups and there was also no spike in ecess mortality for this age group when Hurricane Maria made Landfall. Same with 25-64 age groups but not as strong. 
+
+The hurricane seemed to affect older age groups with both males and females equally affected. 
 
 ### Negative Binomal Prediction:
 ```{r}
@@ -516,17 +547,26 @@ full_table <- full_table %>%
          c(1:31), c(1:31))) %>% 
   dplyr:: select(Month, day, Y2015, Y2016, Y2017, diff)
 
-# day <- c(c(1:30), c(1:31),
-#          c(1:30), c(1:31), 
-#          c(1:31), c(1:29), 
-#          c(1:31), c(1:30), 
-#          c(1:31), c(1:30), 
-#          c(1:31), c(1:31))
-
-
-table(full_table$Month)
+kable(full_table %>% group_by(Month) %>% slice(1:3))
 ```
 
+```{r}
+# comparing nyt data w excessmort data
+nyt_check_df <- dat %>% 
+  mutate(year = year(date), 
+         month = month(date, label = TRUE),
+         day = day(date)) %>% 
+  dplyr::select(day, month, year, outcome) %>% 
+  filter(year >= 2015 & year <= 2017) %>% 
+  group_by(day, month, year) %>% 
+  summarise(total_deaths = sum(outcome)) %>% 
+  pivot_wider(names_from = year, values_from = total_deaths) %>% 
+  mutate(diff = `2017`-`2016`) %>% 
+  arrange(month)
 
+kable(nyt_check_df %>% group_by(month) %>% slice(1:3))
 
+```
+
+For the most part, the NYT data matches closely with the data used from the excessmort package. There are some slight differences in number of deaths on certain days in different year but the difference is small (usually no more/less than 5).
 
