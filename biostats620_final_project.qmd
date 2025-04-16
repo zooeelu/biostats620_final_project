@@ -9,7 +9,6 @@ library(kableExtra)
 library(lubridate)
 library(MASS)
 library(pdftools)
-library(tabulapdf)
 ```
 
 ## Question 1: Population Sizes by Age Group and Sex
