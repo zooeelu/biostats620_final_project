@@ -567,9 +567,16 @@ full_table <- full_table %>%
          c(1:31), c(1:30), 
          c(1:31), c(1:30), 
          c(1:31), c(1:31))) %>% 
-  dplyr:: select(Month, day, Y2015, Y2016, Y2017, diff)
+  mutate(Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr",
+                                          "May", "Jun", "Jul", "Aug",
+                                          "Sep", "Oct", "Nov", "Dec")),
+         nyt_diff = diff, 
+         month = Month) %>% 
+  arrange(month) %>% 
+  dplyr:: select(month, day, Y2015, Y2016, Y2017, nyt_diff) 
 
-kable(full_table %>% group_by(Month) %>% slice(1:3))
+
+kable(full_table %>% group_by(month) %>% slice(1:3))
 ```
 
 ```{r}
@@ -583,12 +590,37 @@ nyt_check_df <- dat %>%
   group_by(day, month, year) %>% 
   summarise(total_deaths = sum(outcome)) %>% 
   pivot_wider(names_from = year, values_from = total_deaths) %>% 
-  mutate(diff = `2017`-`2016`) %>% 
+  mutate(og_diff = `2017`-`2016`, 
+         month = factor(as.character(month), levels = c("Jan", "Feb", "Mar", "Apr",
+                                          "May", "Jun", "Jul", "Aug",
+                                          "Sep", "Oct", "Nov", "Dec"))) %>%
   arrange(month)
 
-kable(nyt_check_df %>% group_by(month) %>% slice(1:3))
 
+
+kable(nyt_check_df %>% group_by(month) %>% slice(1:3)) 
+
+# calculating differences between the two datasets
+final_comparison <- inner_join(nyt_check_df %>% dplyr::select(day, month, og_diff),
+                               full_table %>% dplyr::select(day, month, nyt_diff), 
+                               by = c("day", "month")) %>% 
+  mutate(difference = og_diff - nyt_diff) 
+
+final_comparison$week_index <- c(1:nrow(final_comparison))
+
+mean(final_comparison$difference, na.rm = TRUE)
+
+
+# plot of differences 
+
+ggplot(final_comparison, aes(x = week_index, y = difference)) +
+  geom_line(color = "darkblue") +
+  labs(title = "Difference in Calculated Total Deaths Between NYT and excessmort", 
+       subtitle = "Difference Between 2016-2017 ", 
+       x = "Week Index", 
+       y = "Difference") +
+  theme_minimal()
 ```
 
-For the most part, the NYT data matches closely with the data used from the excessmort package. There are some slight differences in number of deaths on certain days in different year but the difference is small (usually no more/less than 5).
+In certain months there are big differences between the two data sources when comparing the calculated 2016-2017 total death differences per day. These differences mostly stem from differences in counts in August as well as the NYT data source completely missing 2017 death data. 
 
