@@ -1,4 +1,4 @@
-## Analyzing Excess Mortality in Puerto Rico After Hurrican Maria
+## Analyzing Excess Mortality in Puerto Rico After Hurricane Maria
 
 ### Documents
 1. Final Report located in `docs` folder titled "Final_Project_Report.pdf"
