@@ -3,3 +3,4 @@
 ### Documents
 1. Final Report located in `docs` folder titled "Final_Project_Report.pdf"
 2. Supplemental Figures located in `docs` folder titled "Supplemental_Figures.pdf"
+3. Rendered qmd file/ script located in `docs` titled "biostats620_final_project.html"
