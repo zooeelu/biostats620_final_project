@@ -4,7 +4,7 @@
 1. Final Report located in `docs` folder titled "Final_Project_Report.pdf"
 2. Supplemental Figures located in `docs` folder titled "Supplemental_Figures.pdf"
 3. Rendered qmd file/ script located in `docs` titled "biostats620_final_project.html"
-4. Final Project presentation located in `docs` folder titled "620 Final Project Presentation.pdf"
+4. Final Project presentation located in `docs` folder titled "620_Final_Project_Presentation.pdf"
 
 ### Data 
 1. Data was used from the "excessmort" package in R
